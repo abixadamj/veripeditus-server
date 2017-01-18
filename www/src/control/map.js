@@ -1,7 +1,7 @@
 /*
  * veripeditus-web - Web frontend to the veripeditus server
- * Copyright (C) 2016  Dominik George <nik@naturalnet.de>
- * Copyright (C) 2016  Eike Tim Jesinghaus <eike@naturalnet.de>
+ * Copyright (C) 2016, 2017  Dominik George <nik@naturalnet.de>
+ * Copyright (C) 2016, 2017  Eike Tim Jesinghaus <eike@naturalnet.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -19,6 +19,10 @@
 
 MapController = function() {
     var self = this;
+    self.name = "map";
+    self.active = false;
+
+    log_debug("Loading MapController.");
 
     // Set up map view
     self.map = L.map("map", {
@@ -30,26 +34,48 @@ MapController = function() {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(self.map);
 
+    log_debug("Set up map layers.");
+
     // Add debugging handlers if debugging is enabled
     if (Veripeditus.debug) {
-        self.map.on('click', function (event) {
+        self.map.on('click', function(event) {
             if (event.originalEvent.ctrlKey) {
-                fake_pos = {
-                    "timestamp": Date.now(),
-                    "coords": {
-                        "latitude": event.latlng.lat,
-                        "longitude": event.latlng.lng,
-                        "accuracy": 1
-                    }
-                };
-                Device.onLocationUpdate(fake_pos);
+                if (!event.originalEvent.shiftKey) {
+                    log_debug("Faking geolocation.");
+
+                    fake_pos = {
+                        "timestamp": Date.now(),
+                        "coords": {
+                            "latitude": event.latlng.lat,
+                            "longitude": event.latlng.lng,
+                            "accuracy": 1
+                        }
+                    };
+                    Device.onLocationUpdate(fake_pos);
+                } else {
+                    log_debug("Faking heading.");
+
+                    // Get own LatLng
+                    var own_latlng = L.latLng(Device.position.coords.latitude, Device.position.coords.longitude);
+
+                    // Get bearing
+                    var bearing = own_latlng.bearingTo(event.latlng);
+                    fake_orientation = {
+                        alpha: 0,
+                        beta: 0,
+                        gamma: 0,
+                        absolute: false,
+                        heading: bearing
+                    };
+                    Device.handleOrientation(fake_orientation);
+                }
             }
         });
     }
 
     // Add initial marker for own position
     self.marker_self = L.marker([Device.position.coords.latitude, Device.position.coords.longitude]);
-//    self.marker_self.addTo(self.map);
+    //    self.marker_self.addTo(self.map);
     self.circle_self = L.circle(self.marker_self.getLatLng(), 0);
     self.circle_self.addTo(self.map);
 
@@ -71,14 +97,22 @@ MapController = function() {
 
     // Called by GameDataService on gameobjects update
     self.onUpdatedGameObjects = function() {
+        if (!self.active) return;
+
+        log_debug("MapController received update of gameobjects.");
+
         // Iterate over gameobjects and add map markers
-        $.each(GameData.gameobjects, function (id, gameobject) {
+        $.each(GameData.gameobjects, function(id, gameobject) {
+            log_debug("Inspecting gameobject id " + id + ".");
+
             // Check whether item should be shown on the map
-            if (! gameobject.attributes.isonmap) {
+            if (!gameobject.attributes.isonmap) {
+                log_debug("Not on map.");
                 return;
             }
 
             // Skip if object is own player
+            // FIXME Hasn't this moved to isonmap with VISIBLE_SELF?
             if (id == GameData.current_player_id) {
                 return;
             }
@@ -88,6 +122,7 @@ MapController = function() {
             if (marker) {
                 // Marker exists, store location
                 marker.setLatLng([gameobject.attributes.latitude, gameobject.attributes.longitude]);
+                log_debug("Updated marker.");
             } else {
                 // Marker does not exist
                 // Construct marker icon from gameobject image
@@ -117,25 +152,34 @@ MapController = function() {
                 // Add marker to map and store to known markers
                 marker.addTo(self.marker_cluster_group);
                 self.gameobject_markers[gameobject.id] = marker;
+                log_debug("Created marker.");
             }
         });
 
         // Iterate over found markers and remove everything not found in gameobjects
-        $.each(self.gameobject_markers, function (id, marker) {
+        $.each(self.gameobject_markers, function(id, marker) {
+            log_debug("Inspecting marker for gameobject id " + id + ".");
+
             if ($.inArray(id, Object.keys(GameData.gameobjects)) == -1) {
                 // Remove marker if object vanished from gameobjects
                 self.marker_cluster_group.removeLayer(marker);
                 delete self.gameobject_markers[id];
-            } else if (! GameData.gameobjects[id].attributes.isonmap) {
+                log_debug("No longer exists, removing.");
+            } else if (!GameData.gameobjects[id].attributes.isonmap) {
                 // Remove marker if object is not visible on map anymore
                 self.marker_cluster_group.removeLayer(marker);
                 delete self.gameobject_markers[id];
+                log_debug("No longer on map, removing.");
             }
         });
     };
 
     // Called by DeviceService on geolocation update
     self.onGeolocationChanged = function() {
+        if (!self.active) return;
+
+        log_debug("MapController received geolocation update.");
+
         // Update position of own marker
         self.marker_self.setLatLng([Device.position.coords.latitude, Device.position.coords.longitude]);
 
@@ -159,17 +203,17 @@ MapController = function() {
     GameData.setBounds([bounds.getSouth(), bounds.getWest()], [bounds.getNorth(), bounds.getEast()]);
 
     // Pass item_collect to GameData with self reference
-    self.item_collect = function (id) {
+    self.item_collect = function(id) {
         GameData.item_collect(id, self);
     };
 
     // Pass npc_talk to GameData with self reference
-    self.npc_talk = function (id) {
+    self.npc_talk = function(id) {
         GameData.npc_talk(id, self);
     };
 
     // Called by GameData routines to close the popup something was called from.
-    self.onGameObjectActionDone = function (data) {
+    self.onGameObjectActionDone = function(data) {
         self.map.closePopup();
 
         // Show any message as a dialog
@@ -177,12 +221,26 @@ MapController = function() {
         if (data.message) {
             var dialog = $('div#dialog');
             dialog.empty();
-            dialog.attr("title", GameData.gameobjects[data.gameobject].name);
             var html = "<p>" + data.message + "</p>";
             var elem = $(html);
             dialog.append(elem);
-            dialog.dialog();
+            dialog.dialog({
+                title: GameData.gameobjects[data.gameobject].attributes.name
+            });
         }
+    };
+
+    self.activate = function() {
+        log_debug("MapController activated.");
+        self.active = true;
+        $("div#map").show();
+        self.onUpdatedGameObjects();
+    };
+
+    self.deactivate = function() {
+        log_debug("MapController deactivated.");
+        self.active = false;
+        $("div#map").hide();
     };
 };
 

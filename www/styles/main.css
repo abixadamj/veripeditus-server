@@ -1,6 +1,8 @@
 html, body {
 	height: 100%;
 	width: 100%;
+	touch-callout: none;
+	user-select: none;
 }
 
 div#content-wrapper {
@@ -60,6 +62,15 @@ div#control-overlay .control-round .control-round-icon {
 	pointer-events: none;
 }
 
+div#control-overlay .control-round .control-round-icon-overlay {
+	position: relative;
+	width: 60%;
+	height: 60%;
+	left: 20%;
+	top: -50%;
+	pointer-events: none;
+}
+
 div#arview {
 	position: absolute;
 	top: 0px;
@@ -70,10 +81,6 @@ div#arview {
 	perspective-origin: 50% 50%;
 	transform-origin: 50% 50%;
 	perspective: 800px;
-	-webkit-transform-style: preserve-3d;
-	-webkit-perspective-origin: 50% 50%;
-	-webkit-transform-origin: 50% 50%;
-	-webkit-perspective: 800px;
 }
 
 div#arview img.argameobject {
@@ -81,7 +88,6 @@ div#arview img.argameobject {
 	max-width: 95%;
 	position: absolute;
 	transform-style: preserve-3d;
-	-webkit-transform-style: preserve-3d;
 }
 
 p.map_popup_image, p.map_popup_image img {

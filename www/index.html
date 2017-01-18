@@ -1,7 +1,7 @@
 <!--
 /*
  * veripeditus-web - Web frontend to the veripeditus server
- * Copyright (C) 2016  Dominik George <nik@naturalnet.de>
+ * Copyright (C) 2016, 2017  Dominik George <nik@naturalnet.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -27,26 +27,34 @@
   <link href="lib/jquery-ui/themes/base/jquery-ui.css" rel="stylesheet" media="screen" />
   <link href="lib/leaflet/leaflet.css"  rel="stylesheet" media="screen" />
   <link href="lib/leaflet/MarkerCluster.css" rel="stylesheet" media="screen" />
+  <link href="lib/leaflet/MarkerCluster.Default.css" rel="stylesheet" media="screen" />
   <link href="styles/main.css"  rel="stylesheet" media="screen" />
  </head>
 
  <body>
   <div id="content-outer">
    <div id="content-wrapper">
-    <div class="view" id="camview" style="display: none">
+    <div class="view" id="camview">
      <video id="cam" autoplay></video>
 
      <div id="arview">
      </div>
     </div>
 
-    <div class="view" id="map" style="display: block">
+    <div class="view" id="map">
     </div>
    </div>
 
    <div id="control-overlay">
     <div id="control-player" class="control control-round">
      <img src="img/ui/btn-player.svg" class="control-round-icon" />
+    </div>
+    <div id="control-view" class="control control-round">
+     <img src="img/ui/btn-map.svg" class="control-round-icon" />
+    </div>
+    <div id="control-compass" class="control control-round">
+     <img src="img/ui/btn-compass.svg" class="control-round-icon" />
+     <img src="img/ui/btn-compass-needle.svg" class="control-round-icon-overlay" id="compass-needle" />
     </div>
    </div>
   </div>
@@ -55,6 +63,7 @@
 
   <script src="lib/jquery/jquery.js"></script>
   <script src="lib/jquery-ui/jquery-ui.js"></script>
+  <script src="lib/jquery-throttle-debounce/jquery.ba-throttle-debounce.js"></script>
   <script src="lib/leaflet/leaflet.js"></script>
   <script src="lib/leaflet/leaflet.markercluster.js"></script>
   <script src="src/util/leaflet-addons.js"></script>
@@ -63,6 +72,6 @@
   <script src="src/device.js"></script>
   <script src="src/gamedata.js"></script>
   <script src="src/control/map.js"></script>
-  <!--script src="src/control/cam.js"></script-->
+  <script src="src/control/cam.js"></script>
  </body>
 </html>

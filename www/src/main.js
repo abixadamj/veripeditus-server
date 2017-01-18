@@ -1,6 +1,7 @@
 /*
  * veripeditus-web - Web frontend to the veripeditus server
- * Copyright (C) 2016  Dominik George <nik@naturalnet.de>
+ * Copyright (C) 2016, 2017  Dominik George <nik@naturalnet.de>
+ * Copyright (C) 2017  Eike Tim Jesinghaus <eike@naturalnet.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -16,13 +17,56 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Utility code for logging
+function log_debug(msg) {
+    if (Veripeditus.debug) {
+        console.log(msg);
+    }
+}
+
 Veripeditus = {
     version: '1.0.0a0.dev0',
     views: [],
+    services: [],
     registerView: function(view) {
+        log_debug("Registering view " + view.name + ".");
+
         this.views.push(view);
+        view.deactivate();
+        if (!this.currentView) {
+            this.currentView = view;
+            view.activate();
+        }
+        var i = this.views.indexOf(this.currentView);
+        i++;
+        if (i == this.views.length) {
+            i = 0;
+        }
+        $("#control-view img").attr("src", "img/ui/btn-" + this.views[i].name + ".svg");
+        this.registerService(view);
     },
-    debug: true
+    registerService: function(service) {
+        log_debug("Registering service " + service.name + ".");
+
+        this.services.push(service);
+    },
+    nextView: function() {
+        var i = this.views.indexOf(this.currentView);
+        i++;
+        if (i == this.views.length) {
+            i = 0;
+        }
+        this.currentView.deactivate();
+        this.currentView = this.views[i];
+        this.currentView.activate();
+        i++;
+        if (i == this.views.length) {
+            i = 0;
+        }
+        $("#control-view img").attr("src", "img/ui/btn-" + this.views[i].name + ".svg");
+    },
+    currentView: undefined,
+    debug: false
 };
 
 // Uncomment to enable debugging in webapp

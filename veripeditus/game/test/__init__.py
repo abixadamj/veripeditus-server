@@ -18,18 +18,15 @@ from veripeditus import framework as f
 
 NAME = 'Veripeditus Test Game'
 DESCRIPTION = 'A useless test game bundled with the server framework'
-AUTHOR = 'Dominik George <nik@naturalnet.de>'
+AUTHOR = 'Dominik George <nik@naturalnet.de> Eike Jesinghaus <eike@naturalnet.de>'
 LICENSE = 'AGPL'
 VERSION = f.VERSION
-
-HIDE_SELF = True
-VISIBLE_RAD_NPCS = 1000000000
 
 class Player(f.Player):
     pass
 
 class Kangoo(f.NPC):
-    spawn_osm = {"natural": "tree"}
+    spawn_osm = {"highway": "bus_stop"}
     default_name = "Kangoo"
     default_image = "avatar_kangaroo"
 

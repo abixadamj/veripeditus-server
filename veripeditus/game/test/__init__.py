@@ -44,6 +44,7 @@ class Kangoo(f.NPC):
     default_image = "kangoo"
 
     def __init__(self):
+        print("__init__() called!")
         self.name = random.choice(("Thorsten", "Dominik", "foo", "bar", "nocheinname"))
         self.item = random.choice((Apple, Beer))
         self.amount = random.randint(1, 10)

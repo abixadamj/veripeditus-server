@@ -42,15 +42,16 @@ class Kangoo(f.NPC):
     default_name = random.choice(("Thorsten", "Dominik", "foo", "bar", "nocheinname"))
     default_image = "kangoo"
 
-    self.attributes["item"] = random.choice((Apple, Beer))
-    self.attributes["amount"] = random.randint(1, 10)
-    self.attributes["finished"] = False
+    def __init__(self):
+        self.item = random.choice((Apple, Beer))
+        self.amount = random.randint(1, 10)
+        self.finished = False
 
     def on_talk(self):
-        if player.has_items(*([self.attributes["item"]]*self.attributes["amount"])) or self.attributes["finished"]:
+        if player.has_items(*([self.item]*self.amount)) or self.finished:
             msg = self.say("Thanks!")
-            player.drop_items(self.attributes["item"])
-            self.attributes["finished"] = True
+            player.drop_items(self.item)
+            self.finished = True
         else:
-            msg = self.say("I want %i of this: %s" % (self.attributes["amount"], self.attributes["item"].default_name))
+            msg = self.say("I want %i of this: %s" % (self.amount, self.item.default_name))
         return msg

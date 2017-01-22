@@ -14,38 +14,43 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import random
+
 from veripeditus import framework as f
 
 NAME = 'Veripeditus Test Game'
-DESCRIPTION = 'A useless test game bundled with the server framework'
-AUTHOR = 'Dominik George <nik@naturalnet.de> Eike Jesinghaus <eike@naturalnet.de>'
+DESCRIPTION = 'Collect and trade items with NPCs.'
+AUTHOR = 'Eike Jesinghaus <eike@naturalnet.de>'
 LICENSE = 'AGPL'
 VERSION = f.VERSION
 
 class Player(f.Player):
     pass
 
+class Apple(f.Item):
+#    spawn_osm = {"natural": "tree"}
+    default_name = "Apple"
+    owned_max = 10
+
+class Beer(f.Item):
+#    spawn_osm = {"amenity": "pub"}
+    default_name = "Beer"
+    owned_max = 10
+
 class Kangoo(f.NPC):
     spawn_osm = {"highway": "bus_stop"}
-    default_name = "Kangoo"
-    default_image = "avatar_kangaroo"
+    default_name = random.choice(("Thorsten", "Dominik", "foo", "bar", "nocheinname"))
+    default_image = "kangoo"
+
+    self.attributes["item"] = random.choice((Apple, Beer))
+    self.attributes["amount"] = random.randint(1, 10)
+    self.attributes["finished"] = False
 
     def on_talk(self):
-        if f.current_player().has_item(Apple):
-            return self.say("Boah geil lecker!")
+        if player.has_items(*([self.attributes["item"]]*self.attributes["amount"])) or self.attributes["finished"]:
+            msg = self.say("Thanks!")
+            player.drop_items(self.attributes["item"])
+            self.attributes["finished"] = True
         else:
-            return self.say("'schwill fressen!")
-
-class Apple(f.Item):
-    spawn_osm = {"natural": "tree"}
-    default_name = "Ein Apfel"
-    default_image = "apple"
-
-    isonmap = False
-
-class AnyChild(f.NPC):
-    spawn_latlon = (51.2156678, 7.2298169)
-    default_image = "avatar_schoolkid"
-
-    def on_talk(self):
-        return self.say("I can make AR games :)!")
+            msg = self.say("I want %i of this: %s" % (self.attributes["amount"], self.attributes["item"].default_name))
+        return msg

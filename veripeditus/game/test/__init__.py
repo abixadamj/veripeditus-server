@@ -1,3 +1,4 @@
+
 # veripeditus-server - Server component for the Veripeditus game framework
 # Copyright (C) 2016  Dominik George <nik@naturalnet.de>
 #
@@ -42,10 +43,11 @@ class Kangoo(f.NPC):
     default_name = "Kangoo"
     default_image = "kangoo"
 
-    self.name = random.choice(("Thorsten", "Dominik", "foo", "bar", "nocheinname"))
-    self.item = random.choice((Apple, Beer))
-    self.amount = random.randint(1, 10)
-    self.finished = False
+    def __init__(self):
+        self.name = random.choice(("Thorsten", "Dominik", "foo", "bar", "nocheinname"))
+        self.item = random.choice((Apple, Beer))
+        self.amount = random.randint(1, 10)
+        self.finished = False
 
     def on_talk(self):
         player = f.current_player()

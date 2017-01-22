@@ -39,15 +39,17 @@ class Beer(f.Item):
 
 class Kangoo(f.NPC):
     spawn_osm = {"highway": "bus_stop"}
-    default_name = random.choice(("Thorsten", "Dominik", "foo", "bar", "nocheinname"))
+    default_name = "Kangoo"
     default_image = "kangoo"
 
     def __init__(self):
+        self.name = random.choice(("Thorsten", "Dominik", "foo", "bar", "nocheinname"))
         self.item = random.choice((Apple, Beer))
         self.amount = random.randint(1, 10)
         self.finished = False
 
     def on_talk(self):
+        player = f.current_player()
         if player.has_items(*([self.item]*self.amount)) or self.finished:
             msg = self.say("Thanks!")
             player.drop_items(self.item)

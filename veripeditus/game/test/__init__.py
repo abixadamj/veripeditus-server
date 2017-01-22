@@ -51,7 +51,7 @@ class Kangoo(f.NPC):
 
     def on_talk(self):
         player = f.current_player()
-        if player.has_items(*([self.item]*self.amount)) or self.finished:
+        if player.has_item(self.item) >= self.amount or self.finished:
             msg = self.say("Thanks!")
             player.drop_items(self.item)
             self.finished = True

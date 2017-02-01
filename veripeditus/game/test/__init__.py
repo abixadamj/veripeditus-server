@@ -56,7 +56,7 @@ class Kangoo(f.NPC):
 
         if player.has_item(items_map[self.attribute("item")]) >= int(self.attribute("amount")) or self.attribute("finished") == "true":
             player.drop_items(items_map[self.attribute("item")])
-            self.attribute("finished") = "true"
+            self.attribute("finished", "true")
             return self.say("Thanks!")
         else:
             return self.say("I want %s of this: %s" % (self.attribute("amount"), item_map[self.attribute("item")].default_name))

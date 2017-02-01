@@ -1,6 +1,6 @@
-
 # veripeditus-server - Server component for the Veripeditus game framework
-# Copyright (C) 2016  Dominik George <nik@naturalnet.de>
+# Copyright (C) 2017  Eike Tim Jesinghaus <eike@naturalnet.de>
+# Copyright (C) 2017  Dominik George <nik@naturalnet.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -29,12 +29,12 @@ class Player(f.Player):
     pass
 
 class Apple(f.Item):
-#    spawn_osm = {"natural": "tree"}
+    spawn_osm = {"natural": "tree"}
     default_name = "Apple"
     owned_max = 10
 
 class Beer(f.Item):
-#    spawn_osm = {"amenity": "pub"}
+    spawn_osm = {"amenity": "pub"}
     default_name = "Beer"
     owned_max = 10
 
@@ -43,18 +43,20 @@ class Kangoo(f.NPC):
     default_name = "Kangoo"
     default_image = "kangoo"
 
-    def init(self):
+    def __init__(self):
         self.name = random.choice(("Thorsten", "Dominik", "foo", "bar", "nocheinname"))
-        self.item = random.choice((Apple, Beer))
-        self.amount = random.randint(1, 10)
-        self.finished = False
+        self.attribute("item", random.choice(("apple", "beer")))
+        self.attribute("amount", str(random.randint(1, 10)))
+        self.attribute("finished", "false")
 
     def on_talk(self):
         player = f.current_player()
-        if player.has_item(self.item) >= self.amount or self.finished:
-            msg = self.say("Thanks!")
-            player.drop_items(self.item)
-            self.finished = True
+
+        items_map = {"apple": Apple, "beer": Beer}
+
+        if player.has_item(items_map[self.attribute("item")]) >= int(self.attribute("amount")) or self.attribute("finished") == "true":
+            player.drop_items(items_map[self.attribute("item")])
+            self.attribute("finished") = "true"
+            return self.say("Thanks!")
         else:
-            msg = self.say("I want %i of this: %s" % (self.amount, self.item.default_name))
-        return msg
+            return self.say("I want %s of this: %s" % (self.attribute("amount"), item_map[self.attribute("item")].default_name))

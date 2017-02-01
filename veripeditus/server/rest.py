@@ -57,6 +57,7 @@ for go in [GameObject] + GameObject.__subclasses__():
         MANAGER.create_api(rgo,
                            additional_attributes=["gameobject_type"],
                            includes=rgo._api_includes,
+                           exclude=["attributes"],
                            page_size=0, max_page_size=0)
 
 @APP.route("/api/v2/<string:type_>/<int:id_>/<string:method>")

@@ -81,7 +81,7 @@ class Attribute(Base):
 class GameObject(Base, metaclass=_GameObjectMeta):
     __tablename__ = "gameobject"
 
-    _api_includes = ["world", "attributes"]
+    _api_includes = ["world"]
 
     id = DB.Column(DB.Integer(), primary_key=True)
 
@@ -107,7 +107,8 @@ class GameObject(Base, metaclass=_GameObjectMeta):
 
     attributes = DB.relationship("Attribute", secondary="gameobjects_to_attributes")
     def attribute(self, key, value=None):
-        attribute = self.attributes.any(key=key).scalar()
+        attributes = [attribute for attribute in self.attributes if attribute.key == key]
+        attribute = attributes[0] if attributes else None
 
         if value is None:
             return attribute.value if attribute else None

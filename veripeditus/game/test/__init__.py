@@ -59,4 +59,4 @@ class Kangoo(f.NPC):
             self.attribute("finished", "true")
             return self.say("Thanks!")
         else:
-            return self.say("I want %s of this: %s" % (self.attribute("amount"), item_map[self.attribute("item")].default_name))
+            return self.say("I want %s of this: %s" % (self.attribute("amount"), items_map[self.attribute("item")].default_name))

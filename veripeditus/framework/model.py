@@ -105,9 +105,19 @@ class GameObject(Base, metaclass=_GameObjectMeta):
 
     type = DB.Column(DB.Unicode(256))
 
-    attributes = association_proxy("gameobjects_to_attributes", "value",
-                                   creator=lambda k, v: GameObjectsToAttributes(
-                                       attribute=Attribute(key=k, value=v)))
+    attributes = DB.relationship("Attribute", secondary="gameobjects_to_attributes")
+    def attribute(self, key, value=None):
+        attribute = self.attributes.any(key=key).scalar()
+
+        if value is None:
+            return attribute.value if attribute else None
+        else:
+            if not attribute:
+                attribute = Attribute()
+                self.attributes.append(attribute)
+            attribute.key = key
+            attribute.value = value
+            self.commit()
 
     distance_max = None
 
@@ -320,16 +330,6 @@ class GameObjectsToAttributes(Base):
                               DB.ForeignKey('gameobject.id'))
     attribute_id = DB.Column(DB.Integer(),
                              DB.ForeignKey('attribute.id'))
-
-    gameobject = DB.relationship(GameObject, foreign_keys=[gameobject_id],
-                                 backref=DB.backref("attributes",
-                                                    collection_class=attribute_mapped_collection(
-                                                        "key"),
-                                                    cascade="all, delete-orphan"))
-
-    attribute = DB.relationship(Attribute, foreign_keys=[attribute_id])
-    key = association_proxy("attribute", "key")
-    value = association_proxy("attribute", "value")
 
 class Player(GameObject):
     __tablename__ = "gameobject_player"

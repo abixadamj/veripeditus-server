@@ -31,17 +31,19 @@ class Player(f.Player):
 class Apple(f.Item):
     spawn_osm = {"natural": "tree"}
     default_name = "Apple"
+    default_image = "apple"
     owned_max = 10
 
 class Beer(f.Item):
     spawn_osm = {"amenity": "pub"}
     default_name = "Beer"
+    default_image = "beer"
     owned_max = 10
 
 class Kangoo(f.NPC):
     spawn_osm = {"highway": "bus_stop"}
     default_name = "Kangoo"
-    default_image = "kangoo"
+    default_image = "avatar_kangoo"
 
     def __init__(self):
         self.name = random.choice(("Thorsten", "Dominik", "foo", "bar", "nocheinname"))

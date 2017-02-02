@@ -53,20 +53,35 @@ It is unstable and might be broken. It will also lose data regularly.
 
 ## Authors
 
-The authors and lead developers of Veripeditus are…
+The lead developers of Veripeditus are…
 
  * … Eike Time Jesinghaus <<eike@naturalnet.de>>, a young Python and PyGame
    developer, born 2001 (14 years old at the time the project started)
    and an expert Python and PyGame developer and tutor since his 11ᵗʰ
    birthday, and …
- * … Dominik George <<nik@naturalnet.de>>, formerly teacher of Eike, now
+ * … Dominik George <<nik@naturalnet.de>>, former teacher of Eike, now
    at times his trainee regarding Python magic.
 
-## Licence
+## Licence and copyright
 
-The project is licenced under the GNU Affero General Public License
-version 3 or later. All artwork and other non-code parts are also
-dual-licenced under the Creative Commons-Attribution-Share Alike 4.0
-Unported licence (or later). See the
-[COPYING](https://github.com/Veripeditus/veripeditus-server/blob/master/COPYING)
-file for more details.
+    veripeditus-server - Server component for the Veripeditus game framework
+    Copyright (C) 2016, 2017  The Veripeditus Team and contributors <team@veripeditus.org>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+See the [COPYING](COPYING) file for the full licence, and each source file for
+detailed information.
+
+Artwork may be dual-licensed under CC-BY-4.0+, see relevant directories
+and files for details.

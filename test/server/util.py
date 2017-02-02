@@ -47,7 +47,6 @@ class ServerUtilTests(unittest.TestCase):
         # test should be a key
         self.assertIn("test", games)
 
-
     def test_get_game_by_name(self):
         """ Test getting a game module object by its name """
 

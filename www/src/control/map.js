@@ -2,6 +2,7 @@
  * veripeditus-web - Web frontend to the veripeditus server
  * Copyright (C) 2016, 2017  Dominik George <nik@naturalnet.de>
  * Copyright (C) 2016, 2017  Eike Tim Jesinghaus <eike@naturalnet.de>
+ * Copyright (c) 2017  mirabilos <thorsten.glaser@teckids.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -17,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-MapController = function() {
+MapController = function () {
     var self = this;
     self.name = "map";
     self.active = false;
@@ -38,7 +39,7 @@ MapController = function() {
 
     // Add debugging handlers if debugging is enabled
     if (Veripeditus.debug) {
-        self.map.on('click', function(event) {
+        self.map.on('click', function (event) {
             if (event.originalEvent.ctrlKey) {
                 if (!event.originalEvent.shiftKey) {
                     log_debug("Faking geolocation.");
@@ -84,92 +85,68 @@ MapController = function() {
 
     // Already created markers for gameobjects will be stored here.
     self.gameobject_markers = {};
-
-    // Create a markerClusterGroup for marker clustering functionality
-    self.marker_cluster_group = L.markerClusterGroup({
-        zoomToBoundsOnClick: false,
-        showCoverageOnHover: false,
-        animate: true
-    });
-
-    // Add markerClusterGroup to map as a layer
-    self.map.addLayer(self.marker_cluster_group);
+    self.gameobject_icons = {};
 
     // Called by GameDataService on gameobjects update
-    self.onUpdatedGameObjects = function() {
+    self.onUpdatedGameObjects = function () {
         if (!self.active) return;
 
         log_debug("MapController received update of gameobjects.");
 
-        // Iterate over gameobjects and add map markers
-        $.each(GameData.gameobjects, function(id, gameobject) {
-            log_debug("Inspecting gameobject id " + id + ".");
+        var new_markers = {};
+        var new_icons = {};
 
-            // Check whether item should be shown on the map
-            if (!gameobject.attributes.isonmap) {
-                log_debug("Not on map.");
-                return;
+        $.each(self.gameobject_markers, function (id, marker) {
+            var gameobject = GameData.gameobjects[id];
+            // assert: id === gameobject.id
+            var url = false;
+
+            if (gameobject && gameobject.attributes.isonmap) {
+                url = '/api/v2/gameobject/' + gameobject.id + '/image_raw/' + gameobject.attributes.image;
             }
 
-            // Look for already created marker for self gameobject id
-            var marker = self.gameobject_markers[gameobject.id];
-            if (marker) {
-                // Marker exists, store location
-                marker.setLatLng([gameobject.attributes.latitude, gameobject.attributes.longitude]);
-                log_debug("Updated marker.");
+            if (url === self.gameobject_icons[id]) {
+                new_markers[id] = marker;
+                new_icons[id] = self.gameobject_icons[id];
             } else {
-                // Marker does not exist
-                // Construct marker icon from gameobject image
+                self.map.removeLayer(marker);
+            }
+        });
+
+        $.each(GameData.gameobjects, function (id, gameobject) {
+            // assert: id === gameobject.id
+            if (new_markers[id]) {
+                new_markers[id].setLatLng([gameobject.attributes.latitude, gameobject.attributes.longitude]);
+            } else if (gameobject.attributes.isonmap) {
+                new_icons[id] = '/api/v2/gameobject/' + gameobject.id + '/image_raw/' + gameobject.attributes.image;
+
                 var icon = L.icon({
-                    'iconUrl': '/api/v2/gameobject/' + gameobject.id + '/image_raw',
+                    'iconUrl': new_icons[id],
                     'iconSize': [32, 32],
                 });
 
-                // Create marker at gameobject location
-                marker = L.marker([gameobject.attributes.latitude, gameobject.attributes.longitude], {
-                    'icon': icon
+                var marker = L.marker([gameobject.attributes.latitude, gameobject.attributes.longitude], {
+                    'icon': icon,
                 });
 
-                // Create popup
-                var html = "<h1>" + gameobject.attributes.name + "</h1>";
-                html += "<p class='map_popup_image'><img src='/api/v2/gameobject/" + gameobject.id + "/image_raw' /></p>";
-                if (gameobject.attributes.gameobject_type == "gameobject_item") {
-                    // FIXME also check for collectible
-                    html += "<button class='map_popup_button' onClick='MapView.item_collect(" + gameobject.id + ")'>Collect</button>";
-                }
-                if (gameobject.attributes.gameobject_type == "gameobject_npc") {
-                    // FIXME also check for talkable
-                    html += "<button class='map_popup_button' onClick='MapView.npc_talk(" + gameobject.id + ")'>Talk</button>";
-                }
-                marker.bindPopup(html);
+                marker.on('click', function (e) {
+                    UI.render_view('popup', {
+                        'gameobject': gameobject,
+                        'leaflet-event': e,
+                    });
+                });
 
-                // Add marker to map and store to known markers
-                marker.addTo(self.marker_cluster_group);
-                self.gameobject_markers[gameobject.id] = marker;
-                log_debug("Created marker.");
+                marker.addTo(self.map);
+                new_markers[id] = marker;
             }
         });
 
-        // Iterate over found markers and remove everything not found in gameobjects
-        $.each(self.gameobject_markers, function(id, marker) {
-            log_debug("Inspecting marker for gameobject id " + id + ".");
-
-            if ($.inArray(id, Object.keys(GameData.gameobjects)) == -1) {
-                // Remove marker if object vanished from gameobjects
-                self.marker_cluster_group.removeLayer(marker);
-                delete self.gameobject_markers[id];
-                log_debug("No longer exists, removing.");
-            } else if (!GameData.gameobjects[id].attributes.isonmap) {
-                // Remove marker if object is not visible on map anymore
-                self.marker_cluster_group.removeLayer(marker);
-                delete self.gameobject_markers[id];
-                log_debug("No longer on map, removing.");
-            }
-        });
+        self.gameobject_markers = new_markers;
+        self.gameobject_icons = new_icons;
     };
 
     // Called by DeviceService on geolocation update
-    self.onGeolocationChanged = function() {
+    self.onGeolocationChanged = function () {
         if (!self.active) return;
 
         log_debug("MapController received geolocation update.");
@@ -186,7 +163,7 @@ MapController = function() {
     };
 
     // Subscribe to event on change of map view
-    self.map.on('moveend', function(event) {
+    self.map.on('moveend', function (event) {
         // Update view bounds in GameDataService
         var bounds = event.target.getBounds();
         GameData.setBounds([bounds.getSouth(), bounds.getWest()], [bounds.getNorth(), bounds.getEast()]);
@@ -197,17 +174,17 @@ MapController = function() {
     GameData.setBounds([bounds.getSouth(), bounds.getWest()], [bounds.getNorth(), bounds.getEast()]);
 
     // Pass item_collect to GameData with self reference
-    self.item_collect = function(id) {
+    self.item_collect = function (id) {
         GameData.item_collect(id, self);
     };
 
     // Pass npc_talk to GameData with self reference
-    self.npc_talk = function(id) {
+    self.npc_talk = function (id) {
         GameData.npc_talk(id, self);
     };
 
     // Called by GameData routines to close the popup something was called from.
-    self.onGameObjectActionDone = function(data) {
+    self.onGameObjectActionDone = function (data) {
         self.map.closePopup();
 
         // Show any message as a dialog
@@ -224,14 +201,14 @@ MapController = function() {
         }
     };
 
-    self.activate = function() {
+    self.activate = function () {
         log_debug("MapController activated.");
         self.active = true;
         $("div#map").show();
         self.onUpdatedGameObjects();
     };
 
-    self.deactivate = function() {
+    self.deactivate = function () {
         log_debug("MapController deactivated.");
         self.active = false;
         $("div#map").hide();

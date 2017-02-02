@@ -41,7 +41,6 @@ class Base(DB.Model):
     __abstract__ = True
 
     # Primary key numeric id for all objects
-    # FIXME do we need the uuid?
     id = DB.Column(DB.Integer(), primary_key=True)
 
     # Timestamps for creation and any update, maintained automatically

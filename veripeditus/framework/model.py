@@ -1,6 +1,6 @@
 # veripeditus-server - Server component for the Veripeditus game framework
 # Copyright (C) 2016  Dominik George <nik@naturalnet.de>
-# Copyright (C) 2016  Eike Tim Jesinghaus <eike@naturalnet.de>
+# Copyright (C) 2016, 2017  Eike Tim Jesinghaus <eike@naturalnet.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -16,7 +16,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import Sequence
+from glob import glob
 from numbers import Real
+import json
+import os
 import random
 
 from flask import g, redirect
@@ -30,7 +33,7 @@ from sqlalchemy.sql import and_
 from veripeditus.framework.util import get_image_path, get_gameobject_distance, random_point_in_polygon, send_action
 from veripeditus.server.app import DB, OA
 from veripeditus.server.model import Base, World
-from veripeditus.server.util import api_method
+from veripeditus.server.util import api_method, get_data_path
 
 class _GameObjectMeta(type(Base)):
     """ Meta-class to allow generation of dynamic mapper args.
@@ -78,7 +81,7 @@ class Attribute(Base):
 class GameObject(Base, metaclass=_GameObjectMeta):
     __tablename__ = "gameobject"
 
-    _api_includes = ["world", "attributes"]
+    _api_includes = ["world"]
 
     id = DB.Column(DB.Integer(), primary_key=True)
 
@@ -102,11 +105,24 @@ class GameObject(Base, metaclass=_GameObjectMeta):
 
     type = DB.Column(DB.Unicode(256))
 
-    attributes = association_proxy("gameobjects_to_attributes", "value",
-                                   creator=lambda k, v: GameObjectsToAttributes(
-                                       attribute=Attribute(key=k, value=v)))
+    attributes = DB.relationship("Attribute", secondary="gameobjects_to_attributes")
+    def attribute(self, key, value=None):
+        attributes = [attribute for attribute in self.attributes if attribute.key == key]
+        attribute = attributes[0] if attributes else None
+
+        if value is None:
+            return attribute.value if attribute else None
+        else:
+            if not attribute:
+                attribute = Attribute()
+                self.attributes.append(attribute)
+            attribute.key = key
+            attribute.value = value
+            self.commit()
 
     distance_max = None
+
+    available_images_pattern = ["*.svg", "*.png"]
 
     @property
     def gameobject_type(self):
@@ -134,9 +150,61 @@ class GameObject(Base, metaclass=_GameObjectMeta):
         return self.distance_to(g.user.current_player)
 
     @api_method(authenticated=False)
-    def image_raw(self):
-        with open(self.image_path, "rb") as file:
+    def image_raw(self, name=None):
+        # Take path of current image if name is not given
+        # If name is given take its path instead
+        if name is None:
+            image_path = self.image_path
+        elif name in self.available_images():
+            image_path = get_image_path(self.world.game.module, name)
+        else:
+            # FIXME correct error
+            return None
+
+        with open(image_path, "rb") as file:
             return file.read()
+
+    @api_method(authenticated=True)
+    def set_image(self, name):
+        # Check if image is available
+        if name in self.available_images():
+            # Update image
+            self.image = name
+            self.commit()
+        else:
+            # FIXME correct error
+            return None
+
+        # Redirect to new image
+        return redirect("/api/v2/gameobject/%d/image_raw" % self.id)
+
+    @api_method(authenticated=False)
+    def available_images(self):
+        res = []
+
+        if self.available_images_pattern is not None:
+            # Make patterns a list
+            if isinstance(self.available_images_pattern, list):
+                patterns = self.available_images_pattern
+            else:
+                patterns = [self.available_images_pattern]
+
+            # Get data path of this object's module
+            data_path_game = get_data_path(self.world.game.module)
+            # Get data path of the framework module
+            data_path_framework = get_data_path()
+
+            for data_path in (data_path_game, data_path_framework):
+                for pattern in patterns:
+                    # Get images in data path matching the pattern
+                    res += glob(os.path.join(data_path, pattern))
+
+        # Get basenames of every file without extension
+        basenames = [os.path.extsep.join(os.path.basename(r).split(os.path.extsep)[:-1])
+                     for r in res]
+
+        # Return files in json format
+        return json.dumps(basenames)
 
     @classmethod
     def spawn(cls, world=None):
@@ -264,16 +332,6 @@ class GameObjectsToAttributes(Base):
     attribute_id = DB.Column(DB.Integer(),
                              DB.ForeignKey('attribute.id'))
 
-    gameobject = DB.relationship(GameObject, foreign_keys=[gameobject_id],
-                                 backref=DB.backref("attributes",
-                                                    collection_class=attribute_mapped_collection(
-                                                        "key"),
-                                                    cascade="all, delete-orphan"))
-
-    attribute = DB.relationship(Attribute, foreign_keys=[attribute_id])
-    key = association_proxy("attribute", "key")
-    value = association_proxy("attribute", "value")
-
 class Player(GameObject):
     __tablename__ = "gameobject_player"
 
@@ -286,6 +344,8 @@ class Player(GameObject):
     user = DB.relationship("User", backref=DB.backref("players",
                                                       lazy="dynamic"),
                            foreign_keys=[user_id])
+
+    available_images_pattern = "avatar_*"
 
     def __init__(self, **kwargs):
         GameObject.__init__(self, **kwargs)

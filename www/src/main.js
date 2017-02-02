@@ -2,6 +2,7 @@
  * veripeditus-web - Web frontend to the veripeditus server
  * Copyright (C) 2016, 2017  Dominik George <nik@naturalnet.de>
  * Copyright (C) 2017  Eike Tim Jesinghaus <eike@naturalnet.de>
+ * Copyright (c) 2017  mirabilos <thorsten.glaser@teckids.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
@@ -28,7 +29,7 @@ Veripeditus = {
     version: '1.0.0a0.dev0',
     views: [],
     services: [],
-    registerView: function(view) {
+    registerView: function (view) {
         log_debug("Registering view " + view.name + ".");
 
         this.views.push(view);
@@ -45,12 +46,12 @@ Veripeditus = {
         $("#control-view img").attr("src", "img/ui/btn-" + this.views[i].name + ".svg");
         this.registerService(view);
     },
-    registerService: function(service) {
+    registerService: function (service) {
         log_debug("Registering service " + service.name + ".");
 
         this.services.push(service);
     },
-    nextView: function() {
+    nextView: function () {
         var i = this.views.indexOf(this.currentView);
         i++;
         if (i == this.views.length) {

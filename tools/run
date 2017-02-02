@@ -1,0 +1,10 @@
+#!/bin/sh
+#-
+# Run with '-H 0.0.0.0' to allow others access.
+
+set -ex
+cd "$(dirname "$0")/.."
+PATH=$HOME/.local/bin:$PATH
+export PATH
+pip3 install -I --no-deps .
+exec veripeditus-standalone -d -w www "$@"

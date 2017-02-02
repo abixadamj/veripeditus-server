@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-DeviceService = function() {
+DeviceService = function () {
     var self = this;
     self.name = "device";
 
@@ -42,7 +42,7 @@ DeviceService = function() {
     };
 
     // Callback for Geolocation's watchPosition()
-    self.onLocationUpdate = function(newpos) {
+    self.onLocationUpdate = function (newpos) {
         // Store coords and timestamp from Geolocation service
         self.position.coords = newpos.coords;
         self.position.timestamp = newpos.timestamp;
@@ -50,7 +50,7 @@ DeviceService = function() {
         log_debug("Position changed to " + newpos.coords.latitude + ", " + newpos.coords.longitude);
 
         // Call onGeolocationChanged on all services
-        $.each(Veripeditus.services, function(id, service) {
+        $.each(Veripeditus.services, function (id, service) {
             if (service.onGeolocationChanged) {
                 service.onGeolocationChanged();
             }
@@ -58,7 +58,7 @@ DeviceService = function() {
     };
 
     // Callback for Geolocation errors
-    self.onLocationError = function(error) {
+    self.onLocationError = function (error) {
         // Stores message after finding out what caused the error
         var msg;
 
@@ -76,9 +76,9 @@ DeviceService = function() {
     };
 
     // Start watching Geolocation
-    self.startLocation = function() {
+    self.startLocation = function () {
         // Store watchId for later clearing
-        self.watchId = window.navigator.geolocation.watchPosition($.throttle(500, function(newpos) {
+        self.watchId = window.navigator.geolocation.watchPosition($.throttle(500, function (newpos) {
             self.onLocationUpdate.call(self, newpos);
         }), self.onLocationError, self.locationOptions);
 
@@ -86,7 +86,7 @@ DeviceService = function() {
     }
 
     // Stop watching Geolocation
-    self.stopLocation = function() {
+    self.stopLocation = function () {
         // Only clear if a watch is actually active
         if (self.watchId) {
             // Clear previously stored watchId
@@ -114,15 +114,15 @@ DeviceService = function() {
     self.cameraStream = undefined;
 
     // Start camera by getting user media
-    self.startCamera = function() {
+    self.startCamera = function () {
         // Look for running stream
         if (!self.cameraStream) {
-            navigator.mediaDevices.getUserMedia(self.mediaConstraints).then(function(stream) {
+            navigator.mediaDevices.getUserMedia(self.mediaConstraints).then(function (stream) {
                 self.cameraStream = stream;
                 self.cameraUrl = window.URL.createObjectURL(stream);
 
                 // Call onCameraChanged on all services
-                $.each(Veripeditus.services, function(id, service) {
+                $.each(Veripeditus.services, function (id, service) {
                     if (service.onCameraChanged) {
                         service.onCameraChanged();
                     }
@@ -134,13 +134,13 @@ DeviceService = function() {
     };
 
     // Stop camera
-    self.stopCamera = function() {
+    self.stopCamera = function () {
         if (self.cameraStream) {
             self.cameraStream.getTracks()[0].stop();
             self.cameraStream = undefined;
 
             // Call onCameraChanged on all services
-            $.each(Veripeditus.services, function(id, service) {
+            $.each(Veripeditus.services, function (id, service) {
                 if (service.onCameraChanged) {
                     service.onCameraChanged();
                 }
@@ -160,7 +160,7 @@ DeviceService = function() {
     };
 
     // Event handler for device oreintation changes
-    self.handleOrientation = function(event) {
+    self.handleOrientation = function (event) {
         // Store values
         self.orientation.absolute = event.absolute;
         self.orientation.alpha = event.alpha;
@@ -197,7 +197,7 @@ DeviceService = function() {
         log_debug("Heading changed to " + self.orientation.heading + "°.");
 
         // Call onOrientationChanged on all services
-        $.each(Veripeditus.services, function(id, service) {
+        $.each(Veripeditus.services, function (id, service) {
             if (service.onOrientationChanged) {
                 service.onOrientationChanged();
             }
@@ -205,10 +205,10 @@ DeviceService = function() {
     };
 
     // Start listening for orientation events
-    var handleOrientation = function(event) {
+    var handleOrientation = function (event) {
         self.handleOrientation.call(self, event);
     };
-    self.startOrientation = function() {
+    self.startOrientation = function () {
         // Add global event handler
         window.addEventListener('deviceorientation', $.throttle(500, handleOrientation), true);
 
@@ -216,7 +216,7 @@ DeviceService = function() {
     };
 
     // Stop listening for orientation events
-    self.stopOrientation = function() {
+    self.stopOrientation = function () {
         // Remove global event listener
         window.removeEventListener('deviceorientation', handleOrientation, true);
 

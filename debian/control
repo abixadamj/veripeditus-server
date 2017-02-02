@@ -47,7 +47,7 @@ Depends:
  libjs-jquery-ui,
  libjs-leaflet,
  libjs-leaflet-geometryutil,
- libjs-leaflet-markercluster,
+ libjs-prefix-free,
  ${misc:Depends},
 Recommends:
  javascript-common,

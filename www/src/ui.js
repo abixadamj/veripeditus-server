@@ -77,6 +77,8 @@ UIService = function () {
                 $('#dialog-avatars').height(window.innerHeight * 1 / 3);
             } else if (view == 'popup') {
                 opts.title = opts.gameobject.attributes.name;
+            } else if (view == 'message') {
+                opts.title = opts.source;
             }
 
             //XXX (FIXME: temporarily) Force all dialogues to 90% screen size
@@ -202,6 +204,13 @@ UIService = function () {
                 var elem = $(html);
                 dialog.append(elem);
                 // end of “popup” view
+            } else if (view == 'message') {
+                //XXX FIXME: move this all to an HTML fragment
+                var html = "<p>" + opts.message + "</p>";
+
+                var elem = $(html);
+                dialog.append(elem);
+                // end of “message” view
             }
         });
     };

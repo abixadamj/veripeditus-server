@@ -35,6 +35,7 @@ APP = Flask(__name__)
 APP.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 APP.config['PASSWORD_SCHEMES'] = ['pbkdf2_sha512', 'md5_crypt']
 APP.config['BASIC_REALM'] = "Veripeditus"
+APP.config['OSMALCHEMY_ONLINE'] = True
 
 # Load configuration from a list of text files
 CFGLIST = ['/var/lib/veripeditus/dbconfig.cfg', '/etc/veripeditus/server.cfg']
@@ -43,7 +44,7 @@ for cfg in CFGLIST:
 
 # Initialise SQLAlchemy and OSMAlchemy
 DB = SQLAlchemy(APP)
-OA = OSMAlchemy(DB, overpass=True)
+OA = OSMAlchemy(DB, overpass=True if APP.config['OSMALCHEMY_ONLINE'] else None)
 
 # Import model and create tables
 import veripeditus.server.model

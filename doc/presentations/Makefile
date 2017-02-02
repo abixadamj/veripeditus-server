@@ -27,6 +27,9 @@ endif
 ifeq ($(FORMAT), notes)
 	BEAMER_OPTS = notes=only
 endif
+ifeq ($(FORMAT), both)
+	BEAMER_OPTS = notes
+endif
 ifeq ($(FORMAT), handout)
 	BEAMER_OPTS = handout
 endif

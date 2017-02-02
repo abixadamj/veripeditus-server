@@ -21,7 +21,7 @@ from setuptools import setup
 
 setup(
     name='Veripeditus',
-    version='1.0.0a1.dev0',
+    version='1.0.0a1',
     long_description=__doc__,
     url="http://www.veripeditus.org",
     author="The Veripeditus Team and contributors",
@@ -38,6 +38,7 @@ setup(
     include_package_data=True,
     package_data={
                   'veripeditus.framework': ['data/*'],
+                  'veripeditus.game.test': ['data/*'],
                  },
     zip_safe=False,
     install_requires=[
@@ -58,7 +59,7 @@ setup(
                                      ]
                  },
     classifiers=[
-                 "Development Status :: 2 - Pre-Alpha",
+                 "Development Status :: 3 - Alpha",
                  "Environment :: Web Environment",
                  "Intended Audience :: Developers",
                  "Intended Audience :: Education",

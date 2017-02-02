@@ -63,7 +63,6 @@ DeviceService = function () {
         var msg;
 
         // Check error code and select own message
-        // FIXME display message
         if (error.code == error.PERMISSION_DENIED) {
             msg = "Permission for tracking location denied.";
         } else if (error.code == error.POSITION_UNAVAILABLE) {
@@ -73,6 +72,8 @@ DeviceService = function () {
         } else {
             msg = "Unknown error acquiring location.";
         }
+
+        UI.render_view('message', {'source': 'Device Geolocation', 'message': msg});
     };
 
     // Start watching Geolocation

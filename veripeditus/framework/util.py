@@ -82,7 +82,7 @@ def random_point_in_polygon(points):
     bounds = polygon.bounds
 
     while True:
-        point = Point(random.uniform(bounds[0], bounds[1]), random.uniform(bounds[2], bounds[3]))
+        point = Point(random.uniform(bounds[0], bounds[2]), random.uniform(bounds[1], bounds[3]))
         if polygon.contains(point):
             break
 

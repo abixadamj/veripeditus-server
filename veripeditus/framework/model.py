@@ -272,7 +272,7 @@ class GameObject(Base, metaclass=_GameObjectMeta):
 
             # Build list of tag values using OSMAlchemy
             has_queries = [OA.node.tags.any(key=k, value=v) for k, v in cls.spawn_osm.items()]
-            and_query = sa_and(*bbox_queries, *has_queries)
+            and_query = sa_and(*(bbox_queries + has_queries))
 
             # Do query
             # FIXME support more than plain nodes

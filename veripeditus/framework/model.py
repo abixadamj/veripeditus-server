@@ -631,3 +631,33 @@ class NPC(GameObject):
                     return False
 
         return True
+
+class Location(GameObject):
+    __tablename__ = "gameobject_location"
+
+    # Columns
+
+    id = DB.Column(DB.Integer(), DB.ForeignKey("gameobject.id"), primary_key=True)
+
+    # Attribute for determining if a player can trigger the location 
+    triggerable = True
+
+    def on_trigger(self, player):
+        pass
+
+    def trigger(self):
+        if g.user is not None and g.user.current_player is not None:
+            player = g.user.current_player
+        else:
+            # FIXME throw proper error
+            return None
+
+        if self.triggerable and self.may_trigger(player):
+            return self.on_trigger(player)
+
+    def may_trigger(self, player):
+        return True
+
+    @hybrid_property  
+    def isonmap(self):
+        return False

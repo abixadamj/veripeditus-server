@@ -20,7 +20,7 @@ import random
 from veripeditus import framework as f
 
 NAME = 'Veripeditus Test Game'
-DESCRIPTION = 'Location test'
+DESCRIPTION = 'Collect and trade items with NPCs.'
 AUTHOR = 'Eike Jesinghaus <eike@naturalnet.de>'
 LICENSE = 'AGPL'
 VERSION = f.VERSION
@@ -28,9 +28,37 @@ VERSION = f.VERSION
 class Player(f.Player):
     pass
 
-class FooLoc(f.Location):
-    spawn_osm = {"natural":"tree"}
-    max_distance = 5
+class Apple(f.Item):
+    spawn_osm = {"natural": "tree"}
+    default_name = "Apple"
+    default_image = "apple"
+    owned_max = 10
 
-    def on_pass(self, player):
-        print("FOOOOOOOOOOO")
+class Beer(f.Item):
+    spawn_osm = {"amenity": "pub"}
+    default_name = "Beer"
+    default_image = "beer"
+    owned_max = 10
+
+class Kangoo(f.NPC):
+    spawn_osm = {"highway": "bus_stop"}
+    default_name = "Kangoo"
+    default_image = "avatar_kangoo"
+
+    def __init__(self):
+        self.name = random.choice(("Thorsten", "Dominik", "foo", "bar", "nocheinname"))
+        self.attribute("item", random.choice(("apple", "beer")))
+        self.attribute("amount", str(random.randint(1, 10)))
+        self.attribute("finished", "false")
+
+    def on_talk(self):
+        player = f.current_player()
+
+        items_map = {"apple": Apple, "beer": Beer}
+
+        if player.has_item(items_map[self.attribute("item")]) >= int(self.attribute("amount")) or self.attribute("finished") == "true":
+            player.drop_items(items_map[self.attribute("item")])
+            self.attribute("finished", "true")
+            return self.say("Thanks!")
+        else:
+            return self.say("I want %s of this: %s" % (self.attribute("amount"), items_map[self.attribute("item")].default_name))

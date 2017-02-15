@@ -422,6 +422,10 @@ class Player(GameObject):
             if item.auto_collect_radius > 0 and item.distance_to_current_player <= item.auto_collect_radius:
                 item.collect()
 
+        for loc in Location.query.filter_by(world=g.user.current_player.world).all():
+            if loc.distance_to(self) < loc.max_distance:
+                loc.trigger(self)
+
         DB.session.add(self)
         DB.session.commit()
 

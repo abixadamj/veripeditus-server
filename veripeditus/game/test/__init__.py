@@ -33,4 +33,4 @@ class FooLoc(f.Location):
     max_distance = 5
 
     def on_pass(self, player):
-        return self.say("foo")
+        print("FOOOOOOOOOOO")

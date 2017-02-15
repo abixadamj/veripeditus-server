@@ -32,5 +32,5 @@ class FooLoc(f.Location):
     spawn_osm = {"natural":"tree"}
     max_distance = 5
 
-    def on_trigger(self, player):
+    def on_pass(self, player):
         return self.say("foo")

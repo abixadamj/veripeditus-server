@@ -424,7 +424,7 @@ class Player(GameObject):
 
         for loc in Location.query.filter_by(world=g.user.current_player.world).all():
             if loc.distance_to(self) < loc.max_distance:
-                loc.trigger(self)
+                loc.pass_(self)
 
         DB.session.add(self)
         DB.session.commit()
@@ -646,20 +646,23 @@ class Location(GameObject):
     # Attribute for determining if a player can trigger the location 
     triggerable = True
 
-    def on_trigger(self, player):
+    def say(self, message):
+        return send_action("say", self, message)
+
+    def on_pass(self, player):
         pass
 
-    def trigger(self):
+    def pass_(self):
         if g.user is not None and g.user.current_player is not None:
             player = g.user.current_player
         else:
             # FIXME throw proper error
             return None
 
-        if self.triggerable and self.may_trigger(player):
+        if self.triggerable and self.may_pass(player):
             return self.on_trigger(player)
 
-    def may_trigger(self, player):
+    def may_pass(self, player):
         return True
 
     @hybrid_property  

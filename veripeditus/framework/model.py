@@ -424,7 +424,7 @@ class Player(GameObject):
 
         for loc in Location.query.filter_by(world=g.user.current_player.world).all():
             if loc.distance_to(self) < loc.max_distance:
-                loc.pass_(self)
+                loc.pass_()
 
         DB.session.add(self)
         DB.session.commit()
@@ -644,7 +644,7 @@ class Location(GameObject):
     id = DB.Column(DB.Integer(), DB.ForeignKey("gameobject.id"), primary_key=True)
 
     # Attribute for determining if a player can trigger the location 
-    triggerable = True
+    passable = True
 
     def say(self, message):
         return send_action("say", self, message)
@@ -659,7 +659,7 @@ class Location(GameObject):
             # FIXME throw proper error
             return None
 
-        if self.triggerable and self.may_pass(player):
+        if self.passable and self.may_pass(player):
             return self.on_trigger(player)
 
     def may_pass(self, player):

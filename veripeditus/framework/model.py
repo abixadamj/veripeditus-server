@@ -646,9 +646,6 @@ class Location(GameObject):
     # Attribute for determining if a player can trigger the location 
     passable = True
 
-    def say(self, message):
-        return send_action("say", self, message)
-
     def on_pass(self, player):
         pass
 

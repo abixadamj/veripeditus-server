@@ -660,7 +660,7 @@ class Location(GameObject):
             return None
 
         if self.passable and self.may_pass(player):
-            return self.on_trigger(player)
+            return self.on_pass(player)
 
     def may_pass(self, player):
         return True

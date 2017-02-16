@@ -11,7 +11,7 @@ framework and all known games in compliance with the AGPL.
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# (at your option) any later version, with the Game Cartridge Exception.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -64,7 +64,8 @@ def get_sources(modules=_RELEVANT_MODULES, patterns=_RELEVANT_PATTERNS, patterns
     # Assemble sources for all games
     res = {}
     for module in modules:
-        res[module.__name__] = get_module_sources(module, patterns)
+        if getattr(module, "SUPPLY_SOURCE", True):
+            res[module.__name__] = get_module_sources(module, patterns)
 
     # Include web app if known
     res['veripeditus.www'] = {}

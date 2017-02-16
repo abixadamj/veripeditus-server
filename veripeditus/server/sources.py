@@ -67,18 +67,21 @@ def get_sources(modules=_RELEVANT_MODULES, patterns=_RELEVANT_PATTERNS, patterns
         res[module.__name__] = get_module_sources(module, patterns)
 
     # Include web app if known
+    res['veripeditus.www'] = {}
     if 'PATH_WEBAPP' in APP.config:
         files = []
         for pattern in patterns_webapp:
             files += glob(os.path.join(APP.config['PATH_WEBAPP'], pattern), recursive=True)
 
-        res['veripeditus.www'] = {}
         for filename in files:
             relname = os.path.relpath(filename, APP.config['PATH_WEBAPP'])
 
             if os.path.isfile(filename) and not relname.startswith("lib"):
                 with open(filename, "rb") as file:
                     res['veripeditus.www'][relname] = file.read()
+    else:
+        # Include a note
+        res['veripeditus.www']["NOTE"] = b"The sources of the web application are not available, but delivered verbatim to the web browser."
 
     # Return resulting dictionary
     return res

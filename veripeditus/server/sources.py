@@ -27,9 +27,11 @@ import os
 import sys
 import tarfile
 
+from veripeditus.server.app import APP
 from veripeditus.server.util import get_games
 
-_RELEVANT_PATTERNS = ["*.py", os.path.join("data", "*")]
+_RELEVANT_PATTERNS = [os.path.join("**", "*.py"), os.path.join("data", "**", "*")]
+_RELEVANT_PATTERNS_WEBAPP = [os.path.join("**", ext) for ext in ("*.html", "*.js", "*.css", "*.json", "*.svg")]
 _RELEVANT_MODULES = [sys.modules["veripeditus.server"],
                      sys.modules["veripeditus.framework"]] + list(get_games().values())
 
@@ -49,19 +51,34 @@ def get_module_sources(module, patterns=_RELEVANT_PATTERNS):
     for filename in files:
         relname = os.path.relpath(filename, start=path)
 
-        with open(filename, "rb") as file:
-            res[relname] = file.read()
+        if os.path.isfile(filename):
+            with open(filename, "rb") as file:
+                res[relname] = file.read()
 
     # Return resulting dictionary
     return res
 
-def get_sources(modules=_RELEVANT_MODULES, patterns=_RELEVANT_PATTERNS):
+def get_sources(modules=_RELEVANT_MODULES, patterns=_RELEVANT_PATTERNS, patterns_webapp=_RELEVANT_PATTERNS_WEBAPP):
     """ Get all sources for all relevant modules. """
 
     # Assemble sources for all games
     res = {}
     for module in modules:
         res[module.__name__] = get_module_sources(module, patterns)
+
+    # Include web app if known
+    if 'PATH_WEBAPP' in APP.config:
+        files = []
+        for pattern in patterns_webapp:
+            files += glob(os.path.join(APP.config['PATH_WEBAPP'], pattern), recursive=True)
+
+        res['veripeditus.www'] = {}
+        for filename in files:
+            relname = os.path.relpath(filename, APP.config['PATH_WEBAPP'])
+
+            if os.path.isfile(filename) and not relname.startswith("lib"):
+                with open(filename, "rb") as file:
+                    res['veripeditus.www'][relname] = file.read()
 
     # Return resulting dictionary
     return res

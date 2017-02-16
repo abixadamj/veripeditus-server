@@ -61,7 +61,8 @@ def get_sources(modules=_RELEVANT_MODULES, patterns=_RELEVANT_PATTERNS):
     # Assemble sources for all games
     res = {}
     for module in modules:
-        res[module.__name__] = get_module_sources(module, patterns)
+        if getattr(module, "SUPPLY_SOURCE", True):
+            res[module.__name__] = get_module_sources(module, patterns)
 
     # Return resulting dictionary
     return res

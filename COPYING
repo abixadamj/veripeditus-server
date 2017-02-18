@@ -659,3 +659,19 @@ specific requirements.
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 <http://www.gnu.org/licenses/>.
+
+
+The Veripeditus Game Cartridge Exception
+
+As an exception, when using this program, by means of subclassing and/or
+calling individual functions and/or methods, as a library for creating a
+game cartridge to be loaded by the Veripeditus game framework, licensors
+hereby grant permission to distribute the resulting game cartridge under
+licence terms of the game creator’s choice, provided that, for each game
+and other module involved in "propagating" them (including the framework
+and the Veripeditus server), the terms and conditions of each individual
+module are honoured. This effectively means that the game cartridge need
+not be distributed under the terms of the AGPL and, explicitly, that the
+requirement under AGPLv3 §13 (Remote Network Interaction) to provide the
+source code to users does not extend to independent game cartridges made
+under the provision of this exception.

@@ -223,75 +223,73 @@ class GameObject(Base, metaclass=_GameObjectMeta):
 
     @classmethod
     def spawn_default(cls, world):
-        # Determine spawn location
-        if "spawn_latlon" in vars(cls):
-            latlon = cls.spawn_latlon
+        # Determine existing number of objects on map
+        existing = cls.query.filter_by(world=world, isonmap=True).count()
+        if "spawn_min" in vars(cls) and "spawn_max" in vars(cls) and existing < cls.spawn_min:
+            to_spawn = cls.spawn_max - existing
+        elif existing == 0:
+            to_spawn = 1
+        else:
+            to_spawn = 0
 
-            if isinstance(latlon, Sequence):
-                # We got one of:
-                #  (lat, lon)
-                #  ((lat, lon), (lat, lon),…)
-                #  ((lat, lon), radius)
-                if isinstance(latlon[0], Sequence) and isinstance(latlon[1], Sequence):
-                    if len(latlon) == 2:
-                        # We got a rect like ((lat, lon), (lat, lon))
-                        # Randomise coordinates within that rect
-                        latlon = (random.uniform(latlon[0][0], latlon[1][0]), random.uniform(latlon[0][1], latlon[1][1]))
+        # Determine spawn locations
+        spawn_points = {}
+        for _ in range(0, to_spawn):
+            if "spawn_latlon" in vars(cls):
+                latlon = cls.spawn_latlon
+
+                if isinstance(latlon, Sequence):
+                    # We got one of:
+                    #  (lat, lon)
+                    #  ((lat, lon), (lat, lon),…)
+                    #  ((lat, lon), radius)
+                    if isinstance(latlon[0], Sequence) and isinstance(latlon[1], Sequence):
+                        if len(latlon) == 2:
+                            # We got a rect like ((lat, lon), (lat, lon))
+                            # Randomise coordinates within that rect
+                            spawn_points[(random.uniform(latlon[0][0], latlon[1][0]), random.uniform(latlon[0][1], latlon[1][1]))] = None
+                        else:
+                            # We got a polygon, randomise coordinates within it
+                            spawn_points[random_point_in_polygon(latlon)] = None
+                    elif isinstance(latlon[0], Sequence) and isinstance(latlon[1], Real):
+                        # We got a circle like ((lat, lon), radius)
+                        # FIXME implement
+                        raise RuntimeError("Not implemented.")
+                    elif isinstance(latlon[0], Real) and isinstance(latlon[1], Real):
+                        # We got a single point like (lat, lon)
+                        # Nothing to do, we can use that as is
+                        spawn_points[latlon] = None
                     else:
-                        # We got a polygon, randomise coordinates within it
-                        latlon = random_point_in_polygon(latlon)
-                elif isinstance(latlon[0], Sequence) and isinstance(latlon[1], Real):
-                    # We got a circle like ((lat, lon), radius)
-                    # FIXME implement
-                    raise RuntimeError("Not implemented.")
-                elif isinstance(latlon[0], Real) and isinstance(latlon[1], Real):
-                    # We got a single point like (lat, lon)
-                    # Nothing to do, we can use that as is
-                    pass
-                else:
-                    raise TypeError("Unknown value for spawn_latlon.")
+                        raise TypeError("Unknown value for spawn_latlon.")
+            elif "spawn_osm" in vars(cls):
+                # Skip if no current player or current player not in this world
+                if current_player() is None or current_player().world is not world:
+                    return
 
-            # Define a single spawn point with no linked OSM element
-            spawn_points = {latlon: None}
-        elif "spawn_osm" in vars(cls):
-            # Skip if no current player or current player not in this world
-            if current_player() is None or current_player().world is not world:
+                # Define bounding box around current player
+                # FIXME do something more intelligent here
+                lat_min = current_player().latitude - 0.001
+                lat_max = current_player().latitude + 0.001
+                lon_min = current_player().longitude - 0.001
+                lon_max = current_player().longitude + 0.001
+                bbox_queries = [OA.node.latitude>lat_min, OA.node.latitude<lat_max,
+                                OA.node.longitude>lon_min, OA.node.longitude<lon_max]
+
+                # Build list of tag values using OSMAlchemy
+                has_queries = [OA.node.tags.any(key=k, value=v) for k, v in cls.spawn_osm.items()]
+                and_query = sa_and(*bbox_queries, *has_queries)
+
+                # Do query
+                # FIXME support more than plain nodes
+                nodes = DB.session.query(OA.node).filter(and_query).all()
+
+                # Extract latitude and longitude information and build spawn_points
+                spawn_points = {(node.latitude, node.longitude): node for node in nodes}
+            else:
+                # Do nothing if we cannot determine a location
                 return
 
-            # Define bounding box around current player
-            # FIXME do something more intelligent here
-            lat_min = current_player().latitude - 0.001
-            lat_max = current_player().latitude + 0.001
-            lon_min = current_player().longitude - 0.001
-            lon_max = current_player().longitude + 0.001
-            bbox_queries = [OA.node.latitude>lat_min, OA.node.latitude<lat_max,
-                            OA.node.longitude>lon_min, OA.node.longitude<lon_max]
-
-            # Build list of tag values using OSMAlchemy
-            has_queries = [OA.node.tags.any(key=k, value=v) for k, v in cls.spawn_osm.items()]
-            and_query = sa_and(*bbox_queries, *has_queries)
-
-            # Do query
-            # FIXME support more than plain nodes
-            nodes = DB.session.query(OA.node).filter(and_query).all()
-
-            # Extract latitude and longitude information and build spawn_points
-            latlons = [(node.latitude, node.longitude) for node in nodes]
-            spawn_points = dict(zip(latlons, nodes))
-        else:
-            # Do nothing if we cannot determine a location
-            return
-
         for latlon, osm_element in spawn_points.items():
-            # Determine existing number of objects on map
-            existing = cls.query.filter_by(world=world, osm_element=osm_element, isonmap=True).count()
-            if "spawn_min" in vars(cls) and "spawn_max" in vars(cls) and existing < cls.spawn_min:
-                to_spawn = cls.spawn_max - existing
-            elif existing == 0:
-                to_spawn = 1
-            else:
-                to_spawn = 0
-
             # Spawn the determined number of objects
             for i in range(0, to_spawn):
                 # Create a new object

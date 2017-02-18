@@ -678,4 +678,4 @@ class Location(GameObject):
 
     @hybrid_property  
     def isonmap(self):
-        return False
+        return True

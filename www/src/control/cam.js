@@ -319,6 +319,11 @@ CamController = function () {
         GameData.item_collect(id, self);
     };
 
+    // Pass item_place to GameData with self reference
+    self.item_place = function (id) {
+        GameData.item_place(id, self);
+    };
+
     // Pass npc_talk to GameData with self reference
     self.npc_talk = function (id) {
         GameData.npc_talk(id, self);

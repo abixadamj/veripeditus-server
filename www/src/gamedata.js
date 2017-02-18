@@ -321,6 +321,13 @@ GameDataService = function () {
         });
     };
 
+    self.item_place = function (id, view) {
+        self.doRequestJSON("GET", "/api/v2/gameobject/" + id + "/place", function (data) {
+            view.onGameObjectActionDone(data);
+            self.updateGameObjects();
+        });
+    };
+
     self.npc_talk = function (id, view) {
         self.doRequestJSON("GET", "/api/v2/gameobject/" + id + "/talk", function (data) {
             view.onGameObjectActionDone(data);

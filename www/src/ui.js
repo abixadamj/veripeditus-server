@@ -132,6 +132,7 @@ UIService = function () {
                         var html = "<tr>";
                         html += "<td><img src='/api/v2/gameobject/" + real_item.id + '/image_raw/' + real_item.attributes.image + "' /></td>";
                         html += "<td>" + real_item.attributes.name + "</td>";
+                        html += "<td><button onClick='CamView.item_place(" + real_item.id + ")'>Place</button></td>";
                         html += "</tr>";
                         var elem = $(html);
                         $('table#inventory-table').append(elem);

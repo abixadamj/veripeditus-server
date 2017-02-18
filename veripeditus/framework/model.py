@@ -511,7 +511,7 @@ class Item(GameObject):
             self.on_placed()
             DB.session.add(self)
             DB.session.commit()
-            return redirect(url_for(self.__class__m resource_id=self.id))
+            return redirect(url_for(self.__class__, resource_id=self.id))
         else:
             return send_action("notice", self, "You cannot place this!")
 

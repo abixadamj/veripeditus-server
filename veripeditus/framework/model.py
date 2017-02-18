@@ -299,10 +299,10 @@ class GameObject(Base, metaclass=_GameObjectMeta):
 
             # Define bounding box around current player
             # FIXME do something more intelligent here
-            lat_min = current_player.latitude - 0.001
-            lat_max = current_player.latitude + 0.001
-            lon_min = current_player.longitude - 0.001
-            lon_max = current_player.longitude + 0.001
+            lat_min = current_player().latitude - 0.001
+            lat_max = current_player().latitude + 0.001
+            lon_min = current_player().longitude - 0.001
+            lon_max = current_player().longitude + 0.001
             bbox_queries = [OA.node.latitude>lat_min, OA.node.latitude<lat_max,
                             OA.node.longitude>lon_min, OA.node.longitude<lon_max]
 
@@ -494,6 +494,7 @@ class Item(GameObject):
 
     collectible = True
     handoverable = True
+    placeable = True
     owned_max = None
     auto_collect_radius = 0
     show_if_owned_max = None
@@ -524,6 +525,17 @@ class Item(GameObject):
             return redirect(url_for(self.__class__, resource_id=self.id))
         else:
             return send_action("notice", self, "You cannot collect this!")
+
+    @api_method(authenticated=True)
+    def place(self):
+        if current_player() is not None and self.owner == current_player() and self.may_place(self.owner) and self.placeable:
+            self.latlon = self.owner.latlon
+            self.owner = None
+            self.on_placed()
+            self.commit()
+            return redirect(url_for(self.__class__, resource_id=self.id))
+        else:
+            return send_action("notice", self, "You cannot place this!")
 
     @api_method(authenticated=True)
     def handover(self, target_player):
@@ -596,10 +608,16 @@ class Item(GameObject):
     def may_handover(self, player):
         return True
 
+    def may_place(self, player):
+        return True
+
     def on_collected(self):
         pass
 
     def on_handedover(self):
+        pass
+
+    def on_placed(self):
         pass
 
 class NPC(GameObject):

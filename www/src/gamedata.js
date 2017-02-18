@@ -7,7 +7,7 @@
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * (at your option) any later version, with the Game Cartridge Exception.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -316,6 +316,13 @@ GameDataService = function () {
 
     self.item_collect = function (id, view) {
         self.doRequestJSON("GET", "/api/v2/gameobject/" + id + "/collect", function (data) {
+            view.onGameObjectActionDone(data);
+            self.updateGameObjects();
+        });
+    };
+
+    self.item_place = function (id, view) {
+        self.doRequestJSON("GET", "/api/v2/gameobject/" + id + "/place", function (data) {
             view.onGameObjectActionDone(data);
             self.updateGameObjects();
         });

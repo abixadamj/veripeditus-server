@@ -5,7 +5,7 @@
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# (at your option) any later version, with the Game Cartridge Exception.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,7 +22,7 @@ import json
 import os
 import random
 
-from flask import g, redirect
+from flask import redirect
 from flask_restless import url_for
 from sqlalchemy import and_ as sa_and
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -30,7 +30,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.sql import and_
 
-from veripeditus.framework.util import get_image_path, get_gameobject_distance, random_point_in_polygon, send_action
+from veripeditus.framework.util import current_player, get_image_path, get_gameobject_distance, random_point_in_polygon, send_action
 from veripeditus.server.app import DB, OA
 from veripeditus.server.model import Base, World
 from veripeditus.server.util import api_method, get_data_path
@@ -125,6 +125,14 @@ class GameObject(Base, metaclass=_GameObjectMeta):
     available_images_pattern = ["*.svg", "*.png"]
 
     @property
+    def latlon(self):
+        return (self.latitude, self.longitude)
+
+    @latlon.setter
+    def latlon(self, latlon)
+        self.latitude, self.longitude = latlon
+
+    @property
     def gameobject_type(self):
         # Return type of gameobject
         return self.__tablename__
@@ -145,9 +153,9 @@ class GameObject(Base, metaclass=_GameObjectMeta):
     @property
     def distance_to_current_player(self):
         # Return distance to current player
-        if g.user is None or g.user.current_player is None:
+        if current_player() is None:
             return None
-        return self.distance_to(g.user.current_player)
+        return self.distance_to(current_player())
 
     @api_method(authenticated=False)
     def image_raw(self, name=None):
@@ -223,50 +231,78 @@ class GameObject(Base, metaclass=_GameObjectMeta):
 
     @classmethod
     def spawn_default(cls, world):
-        # Get current player
-        current_player = None if g.user is None else g.user.current_player
+        # Determine existing number of objects on map
+        existing = cls.query.filter_by(world=world, isonmap=True).count()
+        if "spawn_max" in vars(cls) and existing < cls.spawn_max:
+            to_spawn = cls.spawn_max - existing
+        elif existing == 0:
+            to_spawn = 1
+        else:
+            to_spawn = 0
 
-        # Determine spawn location
-        if "spawn_latlon" in vars(cls):
-            latlon = cls.spawn_latlon
+        # Determine spawn locations
+        spawn_points = {}
+        for _ in range(0, to_spawn):
+            if "spawn_latlon" in vars(cls):
+                latlon = cls.spawn_latlon
 
-            if isinstance(latlon, Sequence):
-                # We got one of:
-                #  (lat, lon)
-                #  ((lat, lon), (lat, lon),…)
-                #  ((lat, lon), radius)
-                if isinstance(latlon[0], Sequence) and isinstance(latlon[1], Sequence):
-                    if len(latlon) == 2:
-                        # We got a rect like ((lat, lon), (lat, lon))
-                        # Randomise coordinates within that rect
-                        latlon = (random.uniform(latlon[0][0], latlon[1][0]), random.uniform(latlon[0][1], latlon[1][1]))
+                if isinstance(latlon, Sequence):
+                    # We got one of:
+                    #  (lat, lon)
+                    #  ((lat, lon), (lat, lon),…)
+                    #  ((lat, lon), radius)
+                    if isinstance(latlon[0], Sequence) and isinstance(latlon[1], Sequence):
+                        if len(latlon) == 2:
+                            # We got a rect like ((lat, lon), (lat, lon))
+                            # Randomise coordinates within that rect
+                            spawn_points[(random.uniform(latlon[0][0], latlon[1][0]), random.uniform(latlon[0][1], latlon[1][1]))] = None
+                        else:
+                            # We got a polygon, randomise coordinates within it
+                            spawn_points[random_point_in_polygon(latlon)] = None
+                    elif isinstance(latlon[0], Sequence) and isinstance(latlon[1], Real):
+                        # We got a circle like ((lat, lon), radius)
+                        # FIXME implement
+                        raise RuntimeError("Not implemented.")
+                    elif isinstance(latlon[0], Real) and isinstance(latlon[1], Real):
+                        # We got a single point like (lat, lon)
+                        # Nothing to do, we can use that as is
+                        spawn_points[latlon] = None
                     else:
-                        # We got a polygon, randomise coordinates within it
-                        latlon = random_point_in_polygon(latlon)
-                elif isinstance(latlon[0], Sequence) and isinstance(latlon[1], Real):
-                    # We got a circle like ((lat, lon), radius)
-                    # FIXME implement
-                    raise RuntimeError("Not implemented.")
-                elif isinstance(latlon[0], Real) and isinstance(latlon[1], Real):
-                    # We got a single point like (lat, lon)
-                    # Nothing to do, we can use that as is
-                    pass
-                else:
-                    raise TypeError("Unknown value for spawn_latlon.")
+                        raise TypeError("Unknown value for spawn_latlon.")
+            elif "spawn_osm" in vars(cls):
+                # Skip if no current player or current player not in this world
+                if current_player() is None or current_player().world is not world:
+                    return
 
-            # Define a single spawn point with no linked OSM element
-            spawn_points = {latlon: None}
-        elif "spawn_osm" in vars(cls):
-            # Skip if no current player or current player not in this world
-            if current_player is None or current_player.world is not world:
+                # Define bounding box around current player
+                # FIXME do something more intelligent here
+                lat_min = current_player().latitude - 0.001
+                lat_max = current_player().latitude + 0.001
+                lon_min = current_player().longitude - 0.001
+                lon_max = current_player().longitude + 0.001
+                bbox_queries = [OA.node.latitude>lat_min, OA.node.latitude<lat_max,
+                                OA.node.longitude>lon_min, OA.node.longitude<lon_max]
+
+                # Build list of tag values using OSMAlchemy
+                has_queries = [OA.node.tags.any(key=k, value=v) for k, v in cls.spawn_osm.items()]
+                and_query = sa_and(*bbox_queries, *has_queries)
+
+                # Do query
+                # FIXME support more than plain nodes
+                nodes = DB.session.query(OA.node).filter(and_query).all()
+
+                # Extract latitude and longitude information and build spawn_points
+                spawn_points = {(node.latitude, node.longitude): node for node in nodes}
+            else:
+                # Do nothing if we cannot determine a location
                 return
 
             # Define bounding box around current player
             # FIXME do something more intelligent here
-            lat_min = current_player.latitude - 0.001
-            lat_max = current_player.latitude + 0.001
-            lon_min = current_player.longitude - 0.001
-            lon_max = current_player.longitude + 0.001
+            lat_min = current_player().latitude - 0.001
+            lat_max = current_player().latitude + 0.001
+            lon_min = current_player().longitude - 0.001
+            lon_max = current_player().longitude + 0.001
             bbox_queries = [OA.node.latitude>lat_min, OA.node.latitude<lat_max,
                             OA.node.longitude>lon_min, OA.node.longitude<lon_max]
 
@@ -286,15 +322,6 @@ class GameObject(Base, metaclass=_GameObjectMeta):
             return
 
         for latlon, osm_element in spawn_points.items():
-            # Determine existing number of objects on map
-            existing = cls.query.filter_by(world=world, osm_element=osm_element, isonmap=True).count()
-            if "spawn_min" in vars(cls) and "spawn_max" in vars(cls) and existing < cls.spawn_min:
-                to_spawn = cls.spawn_max - existing
-            elif existing == 0:
-                to_spawn = 1
-            else:
-                to_spawn = 0
-
             # Spawn the determined number of objects
             for i in range(0, to_spawn):
                 # Create a new object
@@ -405,12 +432,11 @@ class Player(GameObject):
 
     @api_method(authenticated=True)
     def update_position(self, latlon):
-        if g.user is None:
+        if current_player() is None:
             # FIXME proper error
             return None
 
-        # Only the own position may be updated
-        if g.user is not self.user:
+        if current_player() != self:
             # FIXME proper error
             return None
 
@@ -418,7 +444,7 @@ class Player(GameObject):
         self.latitude, self.longitude = [float(x) for x in latlon.split(",")]
 
         # FIXME remove slow iteration
-        for item in Item.query.filter_by(world=g.user.current_player.world).all():
+        for item in Item.query.filter_by(world=current_player().world).all():
             if item.auto_collect_radius > 0 and item.distance_to_current_player <= item.auto_collect_radius:
                 item.collect()
 
@@ -444,16 +470,16 @@ class Player(GameObject):
         else:
             cls = self.__class__
 
-        if g.user is not None and g.user.current_player is not None:
+        if current_player() is not None:
             # Check if specific constants are set and apply their effects
-            mod = g.user.current_player.world.game.module
+            mod = current_player().world.game.module
             if hasattr(mod, "VISIBLE_RAD_PLAYERS"):
                 # Check if the player is in the visible range
                 if self is not cls and self.distance_to_current_player > mod.VISIBLE_RAD_PLAYERS:
                     return False
             if hasattr(mod, "HIDE_SELF"):
                 # Hide the player if it is the current player
-                if self is not cls and self == g.user.current_player and mod.HIDE_SELF:
+                if self is not cls and self == current_player() and mod.HIDE_SELF:
                     return False
         return True
 
@@ -472,38 +498,48 @@ class Item(GameObject):
 
     collectible = True
     handoverable = True
+    placeable = True
     owned_max = None
     auto_collect_radius = 0
     show_if_owned_max = None
 
     @api_method(authenticated=True)
     def collect(self):
-        if g.user is not None and g.user.current_player is not None:
-            player = g.user.current_player
-        else:
+        if current_player() is None:
             # FIXME throw proper error
             return None
 
         # Check if the player is in range
         if self.distance_max is not None:
-            if self.distance_max < self.distance_to(player):
+            if self.distance_max < self.distance_to(current_player()):
                 return send_action("notice", self, "You are too far away!")
 
         # Check if the player already has the maximum amount of items of a class
         if self.owned_max is not None:
-            if player.has_item(self.__class__) >= self.owned_max:
+            if current_player().has_item(self.__class__) >= self.owned_max:
                 return send_action("notice", self, "You have already collected enough of this!")
 
         # Check if the collection is allowed
-        if self.collectible and self.isonmap and self.may_collect(player):
+        if self.collectible and self.isonmap and self.may_collect(current_player()):
             # Change owner
-            self.owner = player
+            self.owner = current_player()
             self.on_collected()
             DB.session.add(self)
             DB.session.commit()
             return redirect(url_for(self.__class__, resource_id=self.id))
         else:
             return send_action("notice", self, "You cannot collect this!")
+
+    @api_method(authenticated=True)
+    def place(self):
+        if current_player() is not None and self.owner == current_player() and self.may_place(self.owner) and self.placeable:
+            self.latlon = self.owner.latlon
+            self.owner = None
+            self.on_placed()
+            self.commit()
+            return redirect(url_for(self.__class__, resource_id=self.id))
+        else:
+            return send_action("notice", self, "You cannot place this!")
 
     @api_method(authenticated=True)
     def handover(self, target_player):
@@ -540,12 +576,12 @@ class Item(GameObject):
 
         # Check for owned_max functionality
         # Independent of class or instance method
-        if g.user is not None and g.user.current_player is not None:
-            if self.owned_max is not None and g.user.current_player.has_item(cls) >= self.owned_max:
+        if current_player() is not None:
+            if self.owned_max is not None and current_player().has_item(cls) >= self.owned_max:
                 if self.show_if_owned_max is None or not self.show_if_owned_max:
                     # Return a terminal false
                     return False
-            mod = g.user.current_player.world.game.module
+            mod = current_player().world.game.module
             if hasattr(mod, "VISIBLE_RAD_ITEMS"):
                 if self is not cls and self.distance_to_current_player > mod.VISIBLE_RAD_ITEMS:
                     return False
@@ -554,8 +590,8 @@ class Item(GameObject):
         # Independent of class or instance method
         if hasattr(self, "spawn_player_attributes"):
             for key, value in self.spawn_player_attributes.items():
-                if key in g.user.current_player.attributes:
-                    attribute = g.user.current_player.attributes[key]
+                if key in current_player().attributes:
+                    attribute = current_player().attributes[key]
                 else:
                     return False
 
@@ -576,10 +612,16 @@ class Item(GameObject):
     def may_handover(self, player):
         return True
 
+    def may_place(self, player):
+        return True
+
     def on_collected(self):
         pass
 
     def on_handedover(self):
+        pass
+
+    def on_placed(self):
         pass
 
 class NPC(GameObject):
@@ -600,19 +642,17 @@ class NPC(GameObject):
 
     @api_method(authenticated=True)
     def talk(self):
-        if g.user is not None and g.user.current_player is not None:
-            player = g.user.current_player
-        else:
+        if current_player() is None:
             # FIXME throw proper error
             return None
 
         # Check if the player is in range for talking to the NPC
         if self.distance_max is not None:
-            if self.distance_max < self.distance_to(player):
+            if self.distance_max < self.distance_to(current_player()):
                 return send_action("notice", self, "You are too far away!")
 
         # Check if talking to the NPC is allowed
-        if self.talkable and self.isonmap and self.may_talk(player):
+        if self.talkable and self.isonmap and self.may_talk(current_player()):
             # Run talk logic
             return self.on_talk()
         else:
@@ -628,8 +668,8 @@ class NPC(GameObject):
         else:
             cls = self.__class__
 
-        if g.user is not None and g.user.current_player is not None:
-            mod = g.user.current_player.world.game.module
+        if current_player() is not None:
+            mod = current_player().world.game.module
             if hasattr(mod, "VISIBLE_RAD_NPCS"):
                 if self is not cls and self.distance_to_current_player > mod.VISIBLE_RAD_NPCS:
                     return False

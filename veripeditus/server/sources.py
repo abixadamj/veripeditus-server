@@ -11,7 +11,7 @@ framework and all known games in compliance with the AGPL.
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# (at your option) any later version, with the Game Cartridge Exception.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,9 +27,11 @@ import os
 import sys
 import tarfile
 
+from veripeditus.server.app import APP
 from veripeditus.server.util import get_games
 
-_RELEVANT_PATTERNS = ["*.py", os.path.join("data", "*")]
+_RELEVANT_PATTERNS = [os.path.join("**", "*.py"), os.path.join("data", "**", "*")]
+_RELEVANT_PATTERNS_WEBAPP = [os.path.join("**", ext) for ext in ("*.html", "*.js", "*.css", "*.json", "*.svg")]
 _RELEVANT_MODULES = [sys.modules["veripeditus.server"],
                      sys.modules["veripeditus.framework"]] + list(get_games().values())
 
@@ -49,19 +51,38 @@ def get_module_sources(module, patterns=_RELEVANT_PATTERNS):
     for filename in files:
         relname = os.path.relpath(filename, start=path)
 
-        with open(filename, "rb") as file:
-            res[relname] = file.read()
+        if os.path.isfile(filename):
+            with open(filename, "rb") as file:
+                res[relname] = file.read()
 
     # Return resulting dictionary
     return res
 
-def get_sources(modules=_RELEVANT_MODULES, patterns=_RELEVANT_PATTERNS):
+def get_sources(modules=_RELEVANT_MODULES, patterns=_RELEVANT_PATTERNS, patterns_webapp=_RELEVANT_PATTERNS_WEBAPP):
     """ Get all sources for all relevant modules. """
 
     # Assemble sources for all games
     res = {}
     for module in modules:
-        res[module.__name__] = get_module_sources(module, patterns)
+        if getattr(module, "SUPPLY_SOURCE", True):
+            res[module.__name__] = get_module_sources(module, patterns)
+
+    # Include web app if known
+    res['veripeditus.www'] = {}
+    if 'PATH_WEBAPP' in APP.config:
+        files = []
+        for pattern in patterns_webapp:
+            files += glob(os.path.join(APP.config['PATH_WEBAPP'], pattern), recursive=True)
+
+        for filename in files:
+            relname = os.path.relpath(filename, APP.config['PATH_WEBAPP'])
+
+            if os.path.isfile(filename) and not relname.startswith("lib"):
+                with open(filename, "rb") as file:
+                    res['veripeditus.www'][relname] = file.read()
+    else:
+        # Include a note
+        res['veripeditus.www']["NOTE"] = b"The sources of the web application are not available, but delivered verbatim to the web browser."
 
     # Return resulting dictionary
     return res

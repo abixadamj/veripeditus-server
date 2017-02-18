@@ -6,7 +6,7 @@
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * (at your option) any later version, with the Game Cartridge Exception.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -58,6 +58,7 @@ DeviceService = function () {
     };
 
     // Callback for Geolocation errors
+    self.locationErrorShown = false;
     self.onLocationError = function (error) {
         // Stores message after finding out what caused the error
         var msg;
@@ -73,7 +74,10 @@ DeviceService = function () {
             msg = "Unknown error acquiring location.";
         }
 
-        UI.render_view('message', {'source': 'Device Geolocation', 'message': msg});
+        if (!self.locationErrorShown) {
+            UI.render_view('message', {'source': 'Device Geolocation', 'message': msg});
+            self.locationErrorShown = true;
+        }
     };
 
     // Start watching Geolocation

@@ -468,6 +468,7 @@ class Item(GameObject):
 
     collectible = True
     handoverable = True
+    placeable = True
     owned_max = None
     auto_collect_radius = 0
     show_if_owned_max = None
@@ -500,6 +501,19 @@ class Item(GameObject):
             return redirect(url_for(self.__class__, resource_id=self.id))
         else:
             return send_action("notice", self, "You cannot collect this!")
+
+    @api_method(authenticated=True)
+    def place(self):
+        if self.owner is not None and self.may_place(self.owner) and self.placeable:
+            self.latitude = self.owner.latitude
+            self.longitude = self.owner.longitude
+            self.owner = None
+            self.on_placed()
+            DB.session.add(self)
+            DB.session.commit()
+            return redirect(url_for(self.__class__m resource_id=self.id))
+        else:
+            return send_action("notice", self, "You cannot place this!")
 
     @api_method(authenticated=True)
     def handover(self, target_player):
@@ -572,10 +586,16 @@ class Item(GameObject):
     def may_handover(self, player):
         return True
 
+    def may_place(self, player):
+        return True
+
     def on_collected(self):
         pass
 
     def on_handedover(self):
+        pass
+
+    def on_placed(self):
         pass
 
 class NPC(GameObject):

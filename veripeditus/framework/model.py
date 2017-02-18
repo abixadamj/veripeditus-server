@@ -225,7 +225,7 @@ class GameObject(Base, metaclass=_GameObjectMeta):
     def spawn_default(cls, world):
         # Determine existing number of objects on map
         existing = cls.query.filter_by(world=world, isonmap=True).count()
-        if "spawn_min" in vars(cls) and "spawn_max" in vars(cls) and existing < cls.spawn_min:
+        if "spawn_max" in vars(cls) and existing < cls.spawn_max:
             to_spawn = cls.spawn_max - existing
         elif existing == 0:
             to_spawn = 1

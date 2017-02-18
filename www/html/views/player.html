@@ -1,20 +1,45 @@
 <h1>About You</h1>
 
 <div id="dialog-player-login">
- <h2>Login</h2>
-
- <label for="username">Username:</label>
- <input type="text" name="username" id="dialog-player-login-username" size="20" />
-
- <label for="password">Password:</label>
- <input type="password" name="password" id="dialog-player-login-password" size="20" />
-
- <button id="dialog-player-login-button">
-  Login
- </button>
- <button id="dialog-player-register-button">
-  Register
- </button>
+ <div id="dialog-player-login-tabs">
+  <ul>
+   <li><a href="#dialog-player-login-tabs-login">Login</a></li>
+   <li><a href="#dialog-player-login-tabs-register">Register</a></li>
+   <li><a href="html/tabs/about.html">About</a></li>
+  </ul>
+  <div id="dialog-player-login-tabs-login">
+   <div>
+    <label for="username">Username:</label>
+    <input type="text" name="username" id="dialog-player-login-username" size="20" />
+   </div>
+   <div>
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="dialog-player-login-password" size="20" />
+   </div>
+   <p>
+    <button id="dialog-player-login-button">Login</button>
+   </p>
+  </div>
+  <div id="dialog-player-login-tabs-register">
+   <div id="dialog-player-login-tabs-register-text">
+   </div>
+   <div>
+    <label for="username">Username:</label>
+    <input type="text" name="newusername" id="dialog-player-register-newusername" size="20" />
+   </div>
+   <div>
+    <label for="password">Password:</label>
+    <input type="password" name="newpassword" id="dialog-player-register-newpassword" size="20" />
+   </div>
+   <div>
+    <label for="password">Password (again):</label>
+    <input type="password" name="chkpassword" id="dialog-player-register-chkpassword" size="20" />
+   </div>
+   <p>
+    <button id="dialog-player-register-button">Register</button>
+   </p>
+  </div>
+ </div>
 </div>
 
 <div id="dialog-player-logout">
@@ -24,13 +49,30 @@
 
  <hr />
 
- <h2>Change World</h2>
-
- <select id="worlds">
- </select>
-
- <h2>Inventory</h2>
-
- <table id="inventory-table">
- </table>
+ <div id="dialog-player-logout-tabs">
+  <!-- Adjust ui.js if the order changes -->
+  <ul>
+   <!-- #0 --><li><a href="#dialog-player-logout-tabs-inventory">Inventory</a></li>
+   <!-- #1 --><li><a href="#dialog-player-logout-tabs-profile">Profile</a></li>
+   <!-- #2 --><li><a href="#dialog-player-logout-tabs-world">World</a></li>
+   <!-- #3 --><li><a href="html/tabs/about.html">About</a></li>
+  </ul>
+  <div id="dialog-player-logout-tabs-inventory">
+   <table id="inventory-table">
+   </table>
+  </div>
+  <div id="dialog-player-logout-tabs-profile">
+   <h3>Avatar</h3>
+   <img id="dialog-player-logout-tabs-profile-avatar-image"
+    alt="Player avatar" src="img/ui/btn-player.svg" />
+   <p>
+    <button id="dialog-player-logout-tabs-profile-avatar-change">Change</button>
+   </p>
+  </div>
+  <div id="dialog-player-logout-tabs-world">
+   <h3>Change World</h3>
+   <select id="worlds">
+   </select>
+  </div>
+ </div>
 </div>

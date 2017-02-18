@@ -1,0 +1,586 @@
+% veripeditus-server - Presentational material - FOSDEM 2017 presentation
+% Copyright (C) 2017  Eike Tim Jesinghaus <eike@naturalnet.de>
+% Copyright (C) 2017  Dominik George <nik@naturalnet.de>
+%
+% You are free to:
+%
+%    Share — copy and redistribute the material in any medium or format
+%    Adapt — remix, transform, and build upon the material
+%    for any purpose, even commercially.
+%
+%    The licensor cannot revoke these freedoms as long as you follow the license terms.
+%
+% Under the following terms:
+%
+%    Attribution — You must give appropriate credit, provide a link to
+%    the license, and indicate if changes were made. You may do so in any
+%    reasonable manner, but not in any way that suggests the licensor
+%    endorses you or your use.
+%
+%    No additional restrictions — You may not apply legal terms or
+%    technological measures that legally restrict others from doing
+%    anything the license permits.
+%
+% Alternatively, you can use this file under any newer version of the
+% CC-BY licence or AGPL-3+.
+
+\documentclass[aspectratio=43]{beamer}
+
+\usepackage{pgfpages}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{minted}
+\usepackage{wasysym}
+
+\usetheme{veripeditus}
+
+\title{The Veripeditus AR Game Framework}
+\subtitle{Enabling everyone to freely create Augmented Reality Games}
+\author{Eike Tim Jesinghaus, Dominik George}
+\date{2017-02-04}
+\institute{FOSDEM 2017}
+
+\AtBeginSection{
+ \begin{frame}
+  \frametitle{Today's talk}
+  \tableofcontents[currentsection]
+ \end{frame}
+}
+
+\begin{document}
+ \begin{frame}
+  \titlepage
+ \end{frame}
+
+ \section{Who we are}
+
+ \begin{frame}
+  \frametitle{Eike}
+
+  \begin{itemize}
+   \item{Eike Tim Jesinghaus}
+   \item{15 year-old student from Germany}
+   \item{Python programmer since age 11}
+   \item{Python tutor at Teckids e.V.}
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Give the audience a feeling of what kind of person you are.}
+  \item{I'm Eike Tim Jesinghaus, a 15 year-old student from Germany.
+        I've always been interested in computers and taught myself programming at age 11.}
+  \item{Do NOT excuse for this being your first talk, or any other shortcomings you fear.}
+  \item{...}
+ }
+
+ \begin{frame}
+  \frametitle{Nik}
+
+  \begin{itemize}
+   \item{Dominik George}
+   \item{26 years old}
+   \item{Dayjob: Software developer at tarent solutions GmbH}
+   \item{Head of Teckids e.V., the FOSS youth organisation in Germany}
+  \end{itemize}
+ \end{frame}
+
+ \begin{frame}
+  \frametitle{Today's talk}
+  \tableofcontents
+ \end{frame}
+
+ \note[itemize]{
+  \item{Give a short introduction to what we will talk about in each point.
+   \begin{itemize}
+    \item{who we are - obviously, who we are}
+    \item{About Veripeditus - What it is, how it was made, and what we plan it to become}
+    \item{How to create games - How a game in Veripeditus is created}
+    \item{Framework development and design - What technologies we use and our goals}
+    \item{State and future - What's already working, planned, and how Veripeditus can be utilized for many different use fields}
+    \item{You and us and Veripeditus - How you can help, and how to contact us}
+   \end{itemize}
+  }
+  \item{Elaborate on how we are here both to present Veripeditus and to find like-minded people to start a community.}
+  \item{This talk is held to get Veripeditus out into the public and expand the community with like-minded people.}
+ }
+
+ \section{About Veripeditus}
+
+ \begin{frame}
+  \frametitle{What is Veripeditus?}
+
+  \begin{itemize}
+   \item{A free software AR game creation framework}
+   \item{Allows easy creation of augmented reality games}
+   \item{Run your own server with different worlds and different games in them}
+   \item{Play the games using any mobile browser}
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Give a short explanation about what Augmented Reality is in the context of Veripeditus.}
+  \item{Veripeditus is a framework for the creation of AR-games. AR stands for "augmented reality" and is between real life and virtual reality. It expands the real world with virtual, location-bound features.}
+  \item{Note that "easy" means that we are wearig a complete game on our shirts ;).}
+  \item{Ask the audience a few questions, like about their experience with AR games, and so on.}
+ }
+
+ \begin{frame}
+  \frametitle{How it got started}
+
+  \begin{itemize}
+   \item{We were looking for a new fun project}
+   \item{AR gaming seemed to become popular (cf. that monster catching thingy)}
+   \item{We wanted to create something like that without the privacy hassle}
+   \item{Many different ideas - why not make it a framework?}
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{This is about what we thought when we started the project.}
+  \item{Tell a story about how we found Pokémon Go as popular, but non-free, and we wanted our own…}
+  \item{Pokemon GO became incredibly popular, and with it did AR gaming. We wanted to create a free alternative without
+        questionable privacy policy, since that's a huge issue with the current big AR games. But we couldn't agree on what kind of game to create.   
+        So we figured that it may be a good idea to just make it a framework.}
+  \item{Maybe add one or two sentences about privacy being a major issue with popular AR games.}
+ }
+
+ \begin{frame}
+  \frametitle{New goals after some time}
+
+  \begin{itemize}
+   \item{The framework got more and more powerful}
+   \item{Developing games with it got much easier than expected}
+   \item{So now:
+    \begin{itemize}
+     \item{Make it as accessible as possible}
+     \item{Enable use in various fields besides just-for-fun gaming}
+     \item{More about that later!}
+    \end{itemize}
+   }
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Tell a story about how we tried out a lot of things, had many different ideas.}
+  \item{Tell a story about how it got more and more abstract, until we decided to make it a framework.}
+  \item{Tell a story about how we got many new ideas, and talked to many people, who had a lot of ideas on how and where Veripeditus could be useful.}
+  \item{Tell that we will have a look at the various use fields later.}
+ }
+
+ \section{How to create games}
+
+ \begin{frame}
+  \Large
+  Before we discuss more, let's look at how to make a game!
+ \end{frame}
+
+ \note[itemize]{
+  \item{This is an interjection so we break lose from just story-telling.}
+  \item{The audience should feel that we now show off something.}
+ }
+
+ \begin{frame}
+  \frametitle{Basic workflow for making a game}
+
+  \begin{enumerate}
+   \item{Plan any game objects and their features (position, names, images,…}
+   \item{Creating a game is easy - plan game objects and their features, the plot and other logic of the game and implement it in pure python class 
+         definitions.}
+   \item{Draft a game plot, activities, other logic}
+   \item{Put everything together in object/class definitions in pure Python}
+  \end{enumerate}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Tell a bit about every point.}
+  \item{Maybe draft a really simple and quick example for every point, but do NOT give away the example that follows!}
+ }
+
+ \begin{frame}
+  \frametitle{A first tiny game}
+
+  {
+   \inputminted[linenos,breaklines]{python}{ex_schoolkid.py}
+  }
+ \end{frame}
+
+ \note[itemize]{
+  \item{Tell that this is a simple Python module.}
+  \item{The example is a simple python module. Nothing more.}
+  \item{Ask the audience to read it and think about it a bit.}
+  \item{Give 30 seconds or a minute time.}
+  \item{Do not explain the code at this point!}
+ }
+
+ \begin{frame}
+  \Large
+  Quiz time: What have we got here?
+ \end{frame}
+
+ \note[itemize]{
+  \item{Ask the audience to try and explain what the code we showed does.}
+  \item{Really motivate them ;)!}
+ }
+
+ \begin{frame}
+  \frametitle{Quiz time: What have we got here?}
+
+  Answers:
+
+  \begin{itemize}
+   \item{A Player object with no special behaviour}
+   \item{An NPC (non-player character) named AnyChild
+    \begin{itemize}
+     \item{Spawning at every building tagged a school on OpenStreetMap}
+     \item{Having the image of a schoolkid}
+     \item{Saying "I can make AR games :)!" when asked}
+    \end{itemize}
+   }
+  \end{itemize}
+
+  Isn't that cool?
+ \end{frame}
+
+ \note[itemize]{
+  \item{Congratulate the audience for finding out what the game does so well :)!}
+  \item{Repeat all facts, maybe adding or correcting everything that might still be missing.}
+ }
+
+ \begin{frame}
+  \frametitle{First tiny game, in pictures}
+
+  \includegraphics[width=.3\textwidth]{ex_schoolkid_shot1}\hfill
+  \includegraphics[width=.3\textwidth]{ex_schoolkid_shot2}\hfill
+  \includegraphics[width=.3\textwidth]{ex_schoolkid_shot3}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Tell a story about the player walking to the location near the school, seeing the NPC, clicking it and then the talk button, and the NPC sending its response.}
+  \item{Add a note that of course, any logic involving conditions, and so on might influence the response in a real game!}
+ }
+
+ \begin{frame}
+  \frametitle{First tiny game, in pictures}
+
+  \centering
+  \includegraphics[width=.3\textwidth]{ex_schoolkid_shot4}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Explain that the game object is rendered depending on distance and heading difference.}
+  \item{Explain the difficulties of creating a pseudo-3D view from flat images that we faced.}
+ }
+
+ \section{Framework development and design}
+
+ \begin{frame}
+  \frametitle{Framework development and design goals}
+
+  \begin{itemize}
+   \item{Make game creation as easy and accessible as possible}
+   \item{Still allow adding arbitrarily complex code
+    \begin{itemize}
+     \item{No DSL - game cartridges are plain and honest Python packages}
+     \item{Don't get in the way while still being helpful}
+    \end{itemize}
+   }
+   \item{Provide all basic objects and functions to derive from
+    \begin{itemize}
+     \item{Player, Items, NPCs, Locations, …}
+     \item{Dialogues, item management, inventory management, interaction, …}
+    \end{itemize}
+   }
+   \item{Tight and simple integration with OpenStreetMap}
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Elaborate on the point that the framework offers a lot of abstraction, so using it becomes easy.}
+  \item{Elaborate on the point that still, everything is plain Python, and so everything that can be done with Python can be done in a game.}
+  \item{DSL = domain specific language}
+ }
+
+ \begin{frame}
+  \frametitle{Technologies used}
+
+  \begin{itemize}
+   \item{Backend
+    \begin{itemize}
+     \item{Python 3}
+     \item{Flask web framework with Flask-Restless, and others}
+     \item{SQLAlchemy and OSMAlchemy}
+    \end{itemize}
+   }
+   \item{Frontend
+    \begin{itemize}
+     \item{HTML 5, JavaScript, CSS 3}
+     \item{JQuery and JQuery-UI}
+     \item{Leaflet}
+    \end{itemize}
+   }
+   \item{Simple RESTful HTTP API}
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{We intentionally used mature, standard web and database technologies, to show
+        that it can be done with a "classic" approach.}
+  \item{In case of doubt, we used alternatives with lower overhead.
+   \begin{itemize}
+    \item{E.g. AngularJS turned out to be far too heavy.}
+   \end{itemize}
+  }
+ }
+
+ \section{State and future}
+
+ \begin{frame}
+  \frametitle{What's already there}
+
+  \begin{itemize}
+   \item{Framework features and objects
+    \begin{itemize}
+     \item{Items and NPCs}
+     \item{Spawning at lat/lon or OSM objects}
+     \item{Interaction (collecting items and talking to NPCs}
+    \end{itemize}
+   }
+   \item{Backend technology with advanced API}
+   \item{(Rudimentary) reference web application for gameplay
+    \begin{itemize}
+     \item{Map view}
+     \item{Camera / 3D view}
+    \end{itemize}
+   }
+   \item{Advanced debugging/testing mode for easier development}
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Tell a bit about what you can do with every of the aspects.}
+  \item{Describe the game objects
+   \begin{itemize}
+    \item{Player - has an inventory, game can check on its contents}
+    \item{Item - can be collected and used to influence game logic}
+    \item{NPC - Non-player character, can change behaviour in complex ways depending on game state}
+    \item{Location - trigger location-dependent events in backend}
+   \end{itemize}
+  }
+  \item{Game objects can be bound to either geographic coordinates or arbitrary OSM tags.}
+  \item{Debugging mode has a test utility (set player position and heading, WASD movements in camera view)}
+ }
+
+ \begin{frame}
+  \frametitle{Current uses of Veripeditus}
+
+  \begin{itemize}
+   \item{Teckids e.V. school project at Ganztagsrealschule Odenthal
+    \begin{itemize}
+     \item{Public school in Germany}
+     \item{20 students between 12 and 15 years}
+     \item{Weekly coding lessons}
+     \item{Drafting, describing and planning of AR games}
+     \item{Actively contributing feature and change requests}
+    \end{itemize}
+   }
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Elaborate on that the participants, who are students, already contribute to the project.}
+  \item{Stress the fact that this is a good example of integrating coding lessons, free software and community tightly!}
+ }
+
+ \begin{frame}
+  \frametitle{Many different use fields}
+
+  \begin{itemize}
+   \item{Gaming, of course…
+    \begin{itemize}
+     \item{Create just-for-fun outdoor games with AR aspects}
+    \end{itemize}
+   }
+   \item{Educational use
+    \begin{itemize}
+     \item{Coding lessons
+      \begin{itemize}
+       \item{Basic coding}
+       \item{Object-oriented modelling}
+       \item{Databases, APIs, and much more}
+      \end{itemize}
+     }
+     \item{Interdisciplinary use
+      \begin{itemize}
+       \item{Educational games for history, arts, …}
+       \item{Fun at field trips}
+      \end{itemize}
+     }
+    \end{itemize}
+   }
+   \item{Tourism and attractions
+    \begin{itemize}
+     \item{Interactive stories in open air museums, …}
+    \end{itemize}
+   }
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Give an explanation and a short example about every of the aspects.}
+  \item{Elaborate on how Veripeditus can improve computer classes, by combining gaming interests of the students with Python in a framework that can be used at all experience levels.}
+  \item{Elaborate on how AR games could be used in other subjects.}
+ }
+
+ \begin{frame}
+  \Large
+  Spontaneous question: Any quick ideas here?
+ \end{frame}
+
+ \note[itemize]{
+  \item{Motivate the audience to name any ideas they might have right now.}
+ }
+
+ \begin{frame}
+  \frametitle{Coming up / Roadmap}
+
+  \begin{itemize}
+   \item{Improvements to web application}
+   \item{Interactive / live game code editor}
+   \item{More detailed and diverse game object interactions}
+   \item{WebGL 3D models}
+   \item{Sound support}
+   \item{HUD defined by games}
+   \item{3D interaction with game objects (aiming, etc.)}
+   \item{…}
+  \end{itemize}
+
+  Scheduled date for public beta release: 2017-03-11!
+ \end{frame}
+
+ \note[itemize]{
+  \item{Report that Veripeditus is only one year old and we first want to make basic things work very well.}
+  \item{Elanorate a bit on the list of ideas that are already on the roadmap.}
+  \item{Announce public beta release for 11th March 2017.}
+  \item{HUD = head-up display}
+ }
+
+ \section{You and us and Veripeditus}
+
+ \begin{frame}
+  \frametitle{What we can do for you}
+
+  \begin{itemize}
+   \item{Make Veripeditus a framework for YOU to use}
+   \item{Help you implement game ideas in your use fields}
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Elaborate on how we really want to make Veripeditus a good tool for everyone who has a use for AR gaming.}
+  \item{Elaborate on how we will be very happy to see all new thoughts and help out with doing some cool things with Veripeditus.}
+ }
+
+ \begin{frame}
+  \frametitle{What you can do for us to help us help you}
+
+  \begin{itemize}
+   \item{Report your ideas, feature requests and bugs}
+   \item{Help us if you are (or want to be) a JavaScript or CSS guru}
+   \item{Test Veripeditus on many mobile devices}
+   \item{Tell us stories from active usage in different fields}
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Tell the audience that we have many ideas, but are unexperienced with some topics.}
+  \item{Ask specifically for help withthe web application, concerning JavaScript and CSS 3 3D transformations.}
+ }
+
+ \begin{frame}
+  \frametitle{Where to find us}
+
+  \begin{itemize}
+   \item{GitHub: \url{https://github.com/Veripeditus/veripeditus-server}
+    \begin{itemize}
+     \item{Please find up-to-date contact and testing information there!}
+     \item{Go mad reporting ideas, questions, requests and bugs}
+    \end{itemize}
+   }
+   \item{Twitter: \href{https://www.twitter.com/VeripeditusTeam}{@VeripeditusTeam}
+    \begin{itemize}
+     \item{Please follow us to receive updates!}
+    \end{itemize}
+   }
+   \item{E-mail: \href{mailto:team@veripeditus.org}{\nolinkurl{team@veripeditus.org}} }
+  \end{itemize}
+ \end{frame}
+
+ \note[itemize]{
+  \item{Tell the audience that there will be news on the upcoming release within the near future.}
+  \item{Motivate the audience to follow us on Twitter and/or GitHub right now.}
+ }
+
+ \begin{frame}
+  \frametitle{Some numbers}
+
+  \begin{itemize}
+   \item{Code size: >2 kloc (>3.5 kloc including comments)}
+   \item{Commits: exactly 1000 \smiley!}
+   \item{Age: First birthday was on 2017-01-19}
+   \item{Active contributors: 3}
+   \item{Tasks in issue tracker: 33 open, 48 closed}
+  \end{itemize}
+ \end{frame}
+
+ \begin{frame}
+  \frametitle{FOSDEM game}
+
+  Go to \url{https://nightly.veripeditus.org} with any mobile browser.
+
+  \begin{itemize}
+   \item{Small testing game on the campus}
+   \item{Game may be slow and may not work on all devices
+    \begin{itemize}
+     \item{Camera view only works on Firefox on Android}
+     \item{Map view should work on most browsers}
+    \end{itemize}
+   }
+   \item{Please ping us via e-mail or find us somewhere if you have bugs to look at}
+   \item{Find the full code at: \url{https://github.com/Veripeditus/game-fosdem17}}
+  \end{itemize}
+
+  Start by finding the guy at the entrance of building K and listen carefully \smiley!
+ \end{frame}
+
+ \begin{frame}
+  \centering
+
+  \textbf{\huge{}Thank you!}
+
+  {\large{}Time for questions and discussion…}
+
+  \vspace{\baselineskip}
+  {\scriptsize
+   We also want to thank…\\
+   Python • Flask • Flask-Restless • SQLAlchemy • jQuery • Leaflet • OpenStreetMap • mirabilos • Debian • and others we forgot to mention!
+  }
+
+  \vspace{\baselineskip}
+  {
+   Invitation:\\
+   OSMAlchemy workshop • Tomorrow, 12:30 • Geospatial Devroom
+  }
+
+  \vspace{2\baselineskip}
+  {
+   \tiny
+   Proudly made with \LaTeX{} beamer and without fancy office products • Sources at: \insertsourcelink
+  }
+ \end{frame}
+
+ \note[itemize]{
+  \item{Thank everyone for coming and for being a good audience.}
+  \item{Give a decent note on that we have to thank many other projects and people.}
+  \item{Invite to the OSMAlchemy workshop, with a short note on what that is.}
+ }
+\end{document}

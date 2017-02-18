@@ -4,7 +4,7 @@
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# (at your option) any later version, with the Game Cartridge Exception.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -46,7 +46,6 @@ class ServerUtilTests(unittest.TestCase):
 
         # test should be a key
         self.assertIn("test", games)
-
 
     def test_get_game_by_name(self):
         """ Test getting a game module object by its name """

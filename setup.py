@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 # veripeditus-server - Server component for the Veripeditus game framework
-# Copyright (C) 2016  Dominik George <nik@naturalnet.de>
+# Copyright (C) 2016, 2017  Dominik George <nik@naturalnet.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# (at your option) any later version, with the Game Cartridge Exception.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,13 +19,13 @@
 import os
 from setuptools import setup
 
-with open('VERSION', 'r') as f:
-    version = f.read().strip()
-
 setup(
     name='Veripeditus',
-    version=version,
+    version='1.0.0a1',
     long_description=__doc__,
+    url="http://www.veripeditus.org",
+    author="The Veripeditus Team and contributors",
+    author_email="team@veripeditus.org",
     packages=[
               'veripeditus.framework',
               'veripeditus.server',
@@ -40,6 +40,7 @@ setup(
     package_data={
                   'veripeditus.framework': ['data/*'],
                   'veripeditus.editor': ['data/*'],
+                  'veripeditus.game.test': ['data/*'],
                  },
     zip_safe=False,
     install_requires=[
@@ -64,4 +65,16 @@ setup(
                                       'veripeditus-standalone = veripeditus.server:server_main'
                                      ]
                  },
+    classifiers=[
+                 "Development Status :: 3 - Alpha",
+                 "Environment :: Web Environment",
+                 "Intended Audience :: Developers",
+                 "Intended Audience :: Education",
+                 "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+                 "Programming Language :: Python :: 3.5",
+                 "Topic :: Education",
+                 "Topic :: Games/Entertainment",
+                 "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+                 "Topic :: Software Development :: Libraries :: Application Frameworks",
+                ],
 )

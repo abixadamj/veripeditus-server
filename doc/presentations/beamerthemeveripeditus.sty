@@ -1,0 +1,148 @@
+% veripeditus-server - Presentational material - LaTeX template
+% Copyright (C) 2017  Dominik George <nik@naturalnet.de>
+% Copyright (C) 2017  Eike Tim Jesinghaus <eike@naturalnet.de>
+% Copyright (c) 2017  mirabilos <thorsten.glaser@teckids.org>
+%
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as published
+% by the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version, with the Game Cartridge Exception.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+%
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+% Alternatively, you can use this file under GPL-2+, LGPL-2+,
+% CC-BY-4.0+, MIT or MirOS.
+
+\usepackage{lmodern}%
+\usepackage{graphicx}%
+\usepackage{transparent}%
+\usepackage{xstring}%
+
+% From Bernd Raichle via http://www.gust.org.pl/projects/pearls/2006p/index_html
+\def\tkifdef#1#2#3{%
+ \begingroup \expandafter \endgroup \expandafter%
+ \ifx\csname#1\endcsname\undefined#3\else#2\fi%
+}%
+
+% Used to inject the second screen mode from outside (e.g. Makefile)
+\tkifdef{veripeditusSecondScreen}{%
+ \setbeameroption{show notes on second screen}%
+}{}%
+
+% Shortcut for including a trimmed area from background.png
+\newcommand{\veripeditusbgimg}[2][0.4]{%
+ {%
+  \transparent{#1}%
+  \includegraphics[clip,width=\textwidth,#2]{background}%
+ }%
+}%
+
+% Definition for the text inside the headline
+\def\veripeditusheadtext{%
+ \hspace*{3mm}%
+ \includegraphics[height=5mm]{artwork-logo-with-name-h}% left column - logo
+ \hfill%
+ \parbox[b]{.666\textwidth}{% right column - title and subtitle
+  \hfill\textbf{\scriptsize\inserttitle}%
+
+  \hfill\insertsubtitle%
+ }%
+ \hspace*{3mm}%
+}%
+
+% Beamer template for headline
+\setbeamertemplate{headline}{%
+ \ifnum \insertpagenumber = 1% definition for first page, which must be the title page
+  \mbox{\phantom{\veripeditusbgimg{trim=0 550 0 0}}}%
+
+  \vspace{-6.5mm}%
+  \mbox{\phantom{\veripeditusheadtext}}%
+ \else% definition for all following pages
+  \veripeditusbgimg{trim=0 550 0 0}% top 50px of background image
+
+  \vspace{-6.5mm}%
+  \veripeditusheadtext% headline text
+ \fi%
+}%
+
+% Definition for the text inside the footline
+\def\veripeditusfoottext{%
+ \tiny%
+ \hspace*{3mm}%
+ \parbox[b]{.6\textwidth}{% left column - copyright and licence
+  © \StrMid{\insertdate}{1}{4} {} \insertauthor{}, AGPL-3+ or CC-BY-4.0+%
+
+  Map imagery © OpenStreetMap and contributors, ODbL%
+ }%
+ \hfill%
+ \parbox[b]{.3\textwidth}{% right column - information about slides
+  \hfill\insertinstitute{} {}• \insertdate%
+
+  \hfill{}Slide \insertpagenumber{} {}/ \inserttotalframenumber{}%
+ }%
+ \hspace*{3mm}%
+}%
+
+% Beamer template for footline
+\setbeamertemplate{footline}{%
+ \ifnum \insertpagenumber = 1% definition for first page, which must be the title page
+  % do render invisible foottext so length is computed correctly
+  \mbox{\phantom{\veripeditusbgimg{trim=0 0 0 550}}}%
+
+  \vspace{-5.5mm}%
+  \mbox{\phantom{\veripeditusfoottext}}%
+  \vspace{1.5mm}%
+ \else% definition of all following pages
+  \veripeditusbgimg{trim=0 0 0 550}% bottom 50px of background image
+
+  \vspace{-5.5mm}%
+  \veripeditusfoottext% footline text
+  \vspace{1.5mm}%
+ \fi%
+}%
+
+% Beamer template for slide background
+\setbeamertemplate{background}{%
+ \ifnum \insertpagenumber = 1% definition for first page, which must be the title page
+  \veripeditusbgimg{width=\paperwidth}% full background image
+ \else% definition for all following pages
+  \rule{0pt}{\paperheight}% force full height
+  \hspace*{\paperwidth}% force full width
+  \makebox[-3mm][r]{% create box to position background image at bottom right
+   \transparent{0.1}%
+   \includegraphics[trim=0 -18mm 0 0,clip,width=.5\textwidth]{artwork-logo}%
+  }%
+ \fi%
+}%
+
+% Beamer template for title page
+\setbeamertemplate{title page}{%
+ \begin{minipage}[b][.45\textheight][c]{.75\textwidth}% upper both
+  \textbf{\large\inserttitle}\\
+  {\normalsize\insertsubtitle}\\[\baselineskip]
+  {\small\insertauthor}\\
+  {\small\insertinstitute{} • \insertdate}
+ \end{minipage}\\%
+ \begin{minipage}[b][.45\textheight][b]{.5\textwidth}% lower left
+  \centering%
+  \includegraphics[height=.45\textheight]{artwork-tshirt-back}
+ \end{minipage}%
+ \begin{minipage}[b][.45\textheight][b]{.5\textwidth}% lower right
+  \centering%
+  \includegraphics[trim=0 130 0 0,clip,width=\textwidth]{artwork-tshirt-front}
+ \end{minipage}%
+}%
+
+% Disable all navigation symbols
+\setbeamertemplate{navigation symbols}{}%
+
+% Shortcut for link to slide sources
+\newcommand{\insertsourcelink}{%
+ \url{https://github.com/Veripeditus/veripeditus-server/tree/master/doc/presentations}%
+}%

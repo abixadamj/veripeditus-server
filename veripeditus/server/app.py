@@ -10,7 +10,7 @@ This module contains everything to set up the Flask application.
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# (at your option) any later version, with the Game Cartridge Exception.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,6 +35,7 @@ APP = Flask(__name__)
 APP.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 APP.config['PASSWORD_SCHEMES'] = ['pbkdf2_sha512', 'md5_crypt']
 APP.config['BASIC_REALM'] = "Veripeditus"
+APP.config['OSMALCHEMY_ONLINE'] = True
 APP.config['ENABLE_CODE_EDITOR'] = False
 APP.config['CODE_EDITOR_PATH'] = '/var/lib/veripeditus/editor'
 
@@ -45,7 +46,7 @@ for cfg in CFGLIST:
 
 # Initialise SQLAlchemy and OSMAlchemy
 DB = SQLAlchemy(APP)
-OA = OSMAlchemy(DB, overpass=True)
+OA = OSMAlchemy(DB, overpass=True if APP.config['OSMALCHEMY_ONLINE'] else None)
 
 # Import model and create tables
 import veripeditus.server.model

@@ -7,12 +7,12 @@ for views or control.
 """
 
 # veripeditus-server - Server component for the Veripeditus game framework
-# Copyright (C) 2016  Dominik George <nik@naturalnet.de>
+# Copyright (C) 2016, 2017  Dominik George <nik@naturalnet.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# (at your option) any later version, with the Game Cartridge Exception.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -66,13 +66,19 @@ def get_game_by_name(name):
 
     return get_games()[name]
 
-def get_data_path():
+def get_data_path(module=None):
     """
-    Get the full path of the server module data directory.
+    Get the full path of a module data directory.
+
+    module - the module to find the data path for, defaults to framework
     """
 
+    # Default to server module
+    if module is None:
+        module = sys.modules["veripeditus.framework"]
+
     # Get the path of the module implementation
-    _modpath = os.path.dirname(sys.modules["veripeditus.server"].__file__)
+    _modpath = os.path.dirname(module.__file__)
     # Get path of data directory
     _respath = os.path.join(_modpath, "data")
 

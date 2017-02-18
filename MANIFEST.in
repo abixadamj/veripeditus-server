@@ -1,0 +1,7 @@
+include AUTHORS
+include CC-BY-SA-4.0
+include COPYING
+include README.md
+include veripeditus.wsgi
+recursive-include www *
+prune www/lib

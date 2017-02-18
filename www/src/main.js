@@ -2,11 +2,12 @@
  * veripeditus-web - Web frontend to the veripeditus server
  * Copyright (C) 2016, 2017  Dominik George <nik@naturalnet.de>
  * Copyright (C) 2017  Eike Tim Jesinghaus <eike@naturalnet.de>
+ * Copyright (c) 2017  mirabilos <thorsten.glaser@teckids.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * (at your option) any later version, with the Game Cartridge Exception.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,7 +29,7 @@ Veripeditus = {
     version: '1.0.0a0.dev0',
     views: [],
     services: [],
-    registerView: function(view) {
+    registerView: function (view) {
         log_debug("Registering view " + view.name + ".");
 
         this.views.push(view);
@@ -45,12 +46,12 @@ Veripeditus = {
         $("#control-view img").attr("src", "img/ui/btn-" + this.views[i].name + ".svg");
         this.registerService(view);
     },
-    registerService: function(service) {
+    registerService: function (service) {
         log_debug("Registering service " + service.name + ".");
 
         this.services.push(service);
     },
-    nextView: function() {
+    nextView: function () {
         var i = this.views.indexOf(this.currentView);
         i++;
         if (i == this.views.length) {
@@ -69,5 +70,10 @@ Veripeditus = {
     debug: false
 };
 
-// Uncomment to enable debugging in webapp
-Veripeditus.debug = true;
+if (window.URLSearchParams) {
+    var search_param = '' + window.location.search;
+    var params = new URLSearchParams(search_param.replace(/^\?/, ''));
+    if (params.get("debug") == "true") {
+        Veripeditus.debug = true;
+    }
+}

@@ -513,8 +513,7 @@ class Item(GameObject):
     @api_method(authenticated=True)
     def place(self):
         if g.user is not None and g.user.current_player is not None and self.owner == g.user.current_player and self.may_place(self.owner) and self.placeable:
-            self.latitude = self.owner.latitude
-            self.longitude = self.owner.longitude
+            self.latlon = self.owner.latlon
             self.owner = None
             self.on_placed()
             self.commit()

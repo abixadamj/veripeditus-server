@@ -76,7 +76,7 @@ DeviceService = function () {
 
         if (!self.locationErrorShown) {
             UI.render_view('message', {'source': 'Device Geolocation', 'message': msg});
-            self.locationErrorShown - true;
+            self.locationErrorShown = true;
         }
     };
 

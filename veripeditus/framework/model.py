@@ -448,7 +448,7 @@ class Player(GameObject):
             if item.auto_collect_radius > 0 and item.distance_to_current_player <= item.auto_collect_radius:
                 item.collect()
 
-        for loc in Location.query.filter_by(world=g.user.current_player.world).all():
+        for loc in Location.query.filter_by(world=current_player().world).all():
             if loc.distance_to(self) < loc.max_distance:
                 loc.pass_()
 
@@ -690,14 +690,12 @@ class Location(GameObject):
         pass
 
     def pass_(self):
-        if g.user is not None and g.user.current_player is not None:
-            player = g.user.current_player
-        else:
+        if current_player() is None:
             # FIXME throw proper error
             return None
 
-        if self.passable and self.may_pass(player):
-            return self.on_pass(player)
+        if self.passable and self.may_pass(current_player()):
+            return self.on_pass(current_player())
 
     def may_pass(self, player):
         return True

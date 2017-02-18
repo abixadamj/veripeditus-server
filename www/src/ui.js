@@ -7,7 +7,7 @@
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * (at your option) any later version, with the Game Cartridge Exception.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -132,6 +132,7 @@ UIService = function () {
                         var html = "<tr>";
                         html += "<td><img src='/api/v2/gameobject/" + real_item.id + '/image_raw/' + real_item.attributes.image + "' /></td>";
                         html += "<td>" + real_item.attributes.name + "</td>";
+                        html += "<td><button onClick='CamView.item_place(" + real_item.id + ")'>Place</button></td>";
                         html += "</tr>";
                         var elem = $(html);
                         $('table#inventory-table').append(elem);

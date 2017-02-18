@@ -8,7 +8,7 @@ Utility functions for framework components
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# (at your option) any later version, with the Game Cartridge Exception.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -82,7 +82,7 @@ def random_point_in_polygon(points):
     bounds = polygon.bounds
 
     while True:
-        point = Point(random.uniform(bounds[0], bounds[1]), random.uniform(bounds[2], bounds[3]))
+        point = Point(random.uniform(bounds[0], bounds[2]), random.uniform(bounds[1], bounds[3]))
         if polygon.contains(point):
             break
 

@@ -5,7 +5,7 @@
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# (at your option) any later version, with the Game Cartridge Exception.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -62,3 +62,9 @@ class Kangoo(f.NPC):
             return self.say("Thanks!")
         else:
             return self.say("I want %s of this: %s" % (self.attribute("amount"), items_map[self.attribute("item")].default_name))
+
+class Null(f.Location):
+    spawn_latlon = (0.0, 0.0)
+
+    def on_pass(self, player):
+        print("passed")

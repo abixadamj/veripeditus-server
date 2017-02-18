@@ -7,7 +7,7 @@
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * (at your option) any later version, with the Game Cartridge Exception.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -317,6 +317,11 @@ CamController = function () {
     // Pass item_collect to GameData with self reference
     self.item_collect = function (id) {
         GameData.item_collect(id, self);
+    };
+
+    // Pass item_place to GameData with self reference
+    self.item_place = function (id) {
+        GameData.item_place(id, self);
     };
 
     // Pass npc_talk to GameData with self reference

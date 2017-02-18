@@ -125,6 +125,14 @@ class GameObject(Base, metaclass=_GameObjectMeta):
     available_images_pattern = ["*.svg", "*.png"]
 
     @property
+    def latlon(self):
+        return (self.latitude, self.longitude)
+
+    @latlon.setter
+    def _set_latlon(self, latlon)
+        self.latitude, self.longitude = latlon
+
+    @property
     def gameobject_type(self):
         # Return type of gameobject
         return self.__tablename__

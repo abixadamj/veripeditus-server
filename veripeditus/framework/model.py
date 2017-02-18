@@ -129,7 +129,7 @@ class GameObject(Base, metaclass=_GameObjectMeta):
         return (self.latitude, self.longitude)
 
     @latlon.setter
-    def _set_latlon(self, latlon)
+    def latlon(self, latlon)
         self.latitude, self.longitude = latlon
 
     @property

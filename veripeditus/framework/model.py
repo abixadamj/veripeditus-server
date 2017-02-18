@@ -125,6 +125,14 @@ class GameObject(Base, metaclass=_GameObjectMeta):
     available_images_pattern = ["*.svg", "*.png"]
 
     @property
+    def latlon(self):
+        return (self.latitude, self.longitude)
+
+    @latlon.setter
+    def latlon(self, latlon)
+        self.latitude, self.longitude = latlon
+
+    @property
     def gameobject_type(self):
         # Return type of gameobject
         return self.__tablename__
@@ -288,6 +296,30 @@ class GameObject(Base, metaclass=_GameObjectMeta):
             else:
                 # Do nothing if we cannot determine a location
                 return
+
+            # Define bounding box around current player
+            # FIXME do something more intelligent here
+            lat_min = current_player.latitude - 0.001
+            lat_max = current_player.latitude + 0.001
+            lon_min = current_player.longitude - 0.001
+            lon_max = current_player.longitude + 0.001
+            bbox_queries = [OA.node.latitude>lat_min, OA.node.latitude<lat_max,
+                            OA.node.longitude>lon_min, OA.node.longitude<lon_max]
+
+            # Build list of tag values using OSMAlchemy
+            has_queries = [OA.node.tags.any(key=k, value=v) for k, v in cls.spawn_osm.items()]
+            and_query = sa_and(*(bbox_queries + has_queries))
+
+            # Do query
+            # FIXME support more than plain nodes
+            nodes = DB.session.query(OA.node).filter(and_query).all()
+
+            # Extract latitude and longitude information and build spawn_points
+            latlons = [(node.latitude, node.longitude) for node in nodes]
+            spawn_points = dict(zip(latlons, nodes))
+        else:
+            # Do nothing if we cannot determine a location
+            return
 
         for latlon, osm_element in spawn_points.items():
             # Spawn the determined number of objects

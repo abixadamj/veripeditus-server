@@ -58,6 +58,7 @@ DeviceService = function () {
     };
 
     // Callback for Geolocation errors
+    self.locationErrorShown = false;
     self.onLocationError = function (error) {
         // Stores message after finding out what caused the error
         var msg;
@@ -73,7 +74,10 @@ DeviceService = function () {
             msg = "Unknown error acquiring location.";
         }
 
-        UI.render_view('message', {'source': 'Device Geolocation', 'message': msg});
+        if (!self.locationErrorShown) {
+            UI.render_view('message', {'source': 'Device Geolocation', 'message': msg});
+            self.locationErrorShown - true;
+        }
     };
 
     // Start watching Geolocation

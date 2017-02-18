@@ -62,3 +62,9 @@ class Kangoo(f.NPC):
             return self.say("Thanks!")
         else:
             return self.say("I want %s of this: %s" % (self.attribute("amount"), items_map[self.attribute("item")].default_name))
+
+class Null(f.Location):
+    spawn_latlon = (0.0, 0.0)
+
+    def on_pass(self, player):
+        print("passed")

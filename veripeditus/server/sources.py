@@ -35,6 +35,16 @@ _RELEVANT_PATTERNS_WEBAPP = [os.path.join("**", ext) for ext in ("*.html", "*.js
 _RELEVANT_MODULES = [sys.modules["veripeditus.server"],
                      sys.modules["veripeditus.framework"]] + list(get_games().values())
 
+def get_license_file():
+    if "LICENSE_FILE" in APP.config:
+        return os.path.abspath(APP.config["LICENSE_FILE"])
+    else:
+        path = os.path.abspath(os.path.join(APP.config['PATH_WEBAPP'], "..", "COPYING"))
+        if os.path.exists(path):
+            return path
+        else:
+            return None
+
 def get_module_sources(module, patterns=_RELEVANT_PATTERNS):
     """ Get all sources for a Python module's package. """
 
@@ -62,7 +72,7 @@ def get_sources(modules=_RELEVANT_MODULES, patterns=_RELEVANT_PATTERNS, patterns
     """ Get all sources for all relevant modules. """
 
     # Assemble sources for all games
-    res = {}
+    res = {'': {}}
     for module in modules:
         if getattr(module, "SUPPLY_SOURCE", True):
             res[module.__name__] = get_module_sources(module, patterns)
@@ -83,6 +93,10 @@ def get_sources(modules=_RELEVANT_MODULES, patterns=_RELEVANT_PATTERNS, patterns
     else:
         # Include a note
         res['veripeditus.www']["NOTE"] = b"The sources of the web application are not available, but delivered verbatim to the web browser."
+
+    # Add license file
+    with open(get_license_file(), "rb") as file:
+        res['']['COPYING'] = file.read()
 
     # Return resulting dictionary
     return res

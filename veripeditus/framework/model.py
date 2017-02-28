@@ -425,7 +425,7 @@ class Player(GameObject):
                 item.collect()
 
         for loc in Location.query.filter_by(world=current_player().world).all():
-            if loc.distance_to(self) < loc.max_distance:
+            if loc.distance_to(self) < loc.distance_max:
                 loc.pass_()
 
         DB.session.add(self)

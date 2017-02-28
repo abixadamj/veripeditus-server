@@ -71,11 +71,11 @@ def current_player():
     return None if g.user is None else g.user.current_player
 
 def send_action(action, gameobject, message):
-    return json.dumps({
-                       "action": action,
-                       "gameobject": gameobject.id,
-                       "message": message
-                      })
+    g.res.update({
+                  "action": action,
+                  "gameobject": gameobject.id,
+                  "message": message
+                })
 
 def random_point_in_polygon(points):
     polygon = Polygon(points)

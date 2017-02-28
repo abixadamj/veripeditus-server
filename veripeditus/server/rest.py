@@ -69,6 +69,8 @@ def _get_gameobject_method_result(type_, id_, method, arg=None):
     This is what the @api_method decorated methods in the modesl are for.
     """
 
+    g.res = {}
+
     # Determine tpye of object and object
     types = {"gameobject": GameObject,
              "world": World,
@@ -102,6 +104,8 @@ def _get_gameobject_method_result(type_, id_, method, arg=None):
                 # We got a tuple of type and data
                 res = make_response(ret[1])
                 res.headers["Content-Type"] = ret[0]
+            elif ret is None:
+                res = g.res
             else:
                 # We need to guess the MIME type
                 res = make_response(ret)

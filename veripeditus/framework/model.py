@@ -424,7 +424,7 @@ class Player(GameObject):
                 item.collect()
 
         for loc in Location.query.filter_by(world=current_player().world).all():
-            if loc.distance_to(self) < loc.max_distance:
+            if loc.distance_to(self) < loc.distance_max:
                 loc.pass_()
 
         DB.session.add(self)
@@ -498,7 +498,7 @@ class Item(GameObject):
         if self.collectible and self.isonmap and self.may_collect(current_player()):
             # Change owner
             self.owner = current_player()
-            self.on_collected()
+            self.on_collected(player=current_player())
             DB.session.add(self)
             DB.session.commit()
             return redirect(url_for(self.__class__, resource_id=self.id))
@@ -510,7 +510,7 @@ class Item(GameObject):
         if current_player() is not None and self.owner == current_player() and self.may_place(self.owner) and self.placeable:
             self.latlon = self.owner.latlon
             self.owner = None
-            self.on_placed()
+            self.on_placed(player=current_player())
             self.commit()
             return redirect(url_for(self.__class__, resource_id=self.id))
         else:
@@ -522,7 +522,7 @@ class Item(GameObject):
         if self.owner is not None and self.handoverable and self.may_handover(target_player) and target_player.may_accept_handover(self):
             # Change owner
             self.owner = target_player
-            self.on_handedover()
+            self.on_handedover(player=current_player(), receiver=target_player)
             DB.session.add(self)
             DB.session.commit()
             return redirect(url_for(self.__class__, resource_id=self.id))
@@ -590,13 +590,13 @@ class Item(GameObject):
     def may_place(self, player):
         return True
 
-    def on_collected(self):
+    def on_collected(self, **kwargs):
         pass
 
-    def on_handedover(self):
+    def on_handedover(self, **kwargs):
         pass
 
-    def on_placed(self):
+    def on_placed(self, **kwargs):
         pass
 
 class NPC(GameObject):
@@ -612,7 +612,7 @@ class NPC(GameObject):
     def say(self, message):
         return send_action("say", self, message)
 
-    def on_talk(self):
+    def on_talk(self, **kwargs):
         pass
 
     @api_method(authenticated=True)
@@ -629,7 +629,7 @@ class NPC(GameObject):
         # Check if talking to the NPC is allowed
         if self.talkable and self.isonmap and self.may_talk(current_player()):
             # Run talk logic
-            return self.on_talk()
+            return self.on_talk(player=current_player())
         else:
             return send_action("notice", self, "You cannot talk to this character!")
 
@@ -661,7 +661,7 @@ class Location(GameObject):
     # Attribute for determining if a player can trigger the location 
     passable = True
 
-    def on_pass(self, player):
+    def on_pass(self, **kwargs):
         pass
 
     def pass_(self):
@@ -670,7 +670,7 @@ class Location(GameObject):
             return None
 
         if self.passable and self.may_pass(current_player()):
-            return self.on_pass(current_player())
+            return self.on_pass(player=current_player())
 
     def may_pass(self, player):
         return True

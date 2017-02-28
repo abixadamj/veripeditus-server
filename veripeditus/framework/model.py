@@ -487,11 +487,13 @@ class Item(GameObject):
         if self.distance_max is not None:
             if self.distance_max < self.distance_to(current_player()):
                 send_action("notice", self, "You are too far away!")
+                return
 
         # Check if the player already has the maximum amount of items of a class
         if self.owned_max is not None:
             if current_player().has_item(self.__class__) >= self.owned_max:
                 send_action("notice", self, "You have already collected enough of this!")
+                return
 
         # Check if the collection is allowed
         if self.collectible and self.isonmap and self.may_collect(current_player()):
@@ -502,6 +504,7 @@ class Item(GameObject):
             return redirect(url_for(self.__class__, resource_id=self.id))
         else:
             send_action("notice", self, "You cannot collect this!")
+            return
 
     @api_method(authenticated=True)
     def place(self):
@@ -513,6 +516,7 @@ class Item(GameObject):
             return redirect(url_for(self.__class__, resource_id=self.id))
         else:
             send_action("notice", self, "You cannot place this!")
+            return
 
     @api_method(authenticated=True)
     def handover(self, target_player):
@@ -525,6 +529,7 @@ class Item(GameObject):
             return redirect(url_for(self.__class__, resource_id=self.id))
         else:
             send_action("notice", self, "You cannot hand this over.")
+            return
 
     @hybrid_property
     def isonmap(self):
@@ -608,6 +613,7 @@ class NPC(GameObject):
 
     def say(self, message):
         send_action("say", self, message)
+        return
 
     def on_talk(self, **kwargs):
         pass
@@ -622,6 +628,7 @@ class NPC(GameObject):
         if self.distance_max is not None:
             if self.distance_max < self.distance_to(current_player()):
                 send_action("notice", self, "You are too far away!")
+                return
 
         # Check if talking to the NPC is allowed
         if self.talkable and self.isonmap and self.may_talk(current_player()):
@@ -629,6 +636,7 @@ class NPC(GameObject):
             return self.on_talk(player=current_player())
         else:
             send_action("notice", self, "You cannot talk to this character!")
+            return
 
     def may_talk(self, player):
         return True

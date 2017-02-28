@@ -523,7 +523,7 @@ class Item(GameObject):
         if self.owner is not None and self.handoverable and self.may_handover(target_player) and target_player.may_accept_handover(self):
             # Change owner
             self.owner = target_player
-            self.on_handedover(player=current_player())
+            self.on_handedover(player=current_player(), receiver=target_player)
             DB.session.add(self)
             DB.session.commit()
             return redirect(url_for(self.__class__, resource_id=self.id))

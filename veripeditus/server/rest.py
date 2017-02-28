@@ -106,7 +106,7 @@ def _get_gameobject_method_result(type_, id_, method, arg=None):
                 res.headers["Content-Type"] = ret[0]
             elif ret is None:
                 res = make_response(json.dumps(g.res))
-                res.headers["Content-Type"] = "application/json"
+                res.headers["Content-Type"] = "application/vnd.api+json"
             else:
                 # We need to guess the MIME type
                 res = make_response(ret)

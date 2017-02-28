@@ -47,21 +47,21 @@ class Kangoo(f.NPC):
 
     def __init__(self):
         self.name = random.choice(("Thorsten", "Dominik", "foo", "bar", "nocheinname"))
-        self.attribute("item", random.choice(("apple", "beer")))
-        self.attribute("amount", str(random.randint(1, 10)))
-        self.attribute("finished", "false")
+        self.attributes["item"] = random.choice(("apple", "beer"))
+        self.attributes["amount"] = str(random.randint(1, 10))
+        self.attributes["finished"] = "false"
 
     def on_talk(self):
         player = f.current_player()
 
         items_map = {"apple": Apple, "beer": Beer}
 
-        if player.has_item(items_map[self.attribute("item")]) >= int(self.attribute("amount")) or self.attribute("finished") == "true":
-            player.drop_items(items_map[self.attribute("item")])
-            self.attribute("finished", "true")
+        if player.has_item(items_map[self.attributes["item"]]) >= int(self.attributes["amount"]) or self.attributes["finished"] == "true":
+            player.drop_items(items_map[self.attributes["item"]])
+            self.attributes["finished"] = "true"
             return self.say("Thanks!")
         else:
-            return self.say("I want %s of this: %s" % (self.attribute("amount"), items_map[self.attribute("item")].default_name))
+            return self.say("I want %s of this: %s" % (self.attributes["amount"], items_map[self.attributes["item"]].default_name))
 
 class Null(f.Location):
     spawn_latlon = (0.0, 0.0)

@@ -371,9 +371,8 @@ class Player(GameObject):
         if item.name is None:
             item.name = itemclass.__name__.lower()
 
-        DB.session.add(item)
-        DB.session.add(self)
-        DB.session.commit()
+        item.commit()
+        self.commit()
 
     def has_item(self, itemclass):
         # Return how many items of the class the player has
@@ -428,8 +427,7 @@ class Player(GameObject):
             if hasattr(loc, "distance_max") and loc.distance_max is not None and loc.distance_to(self) < loc.distance_max:
                 loc.pass_()
 
-        DB.session.add(self)
-        DB.session.commit()
+        self.commit()
 
         # Redirect to own object
         return redirect(url_for(self.__class__, resource_id=self.id))
@@ -500,8 +498,7 @@ class Item(GameObject):
             # Change owner
             self.owner = current_player()
             self.on_collected(player=current_player())
-            DB.session.add(self)
-            DB.session.commit()
+            self.commit()
             return redirect(url_for(self.__class__, resource_id=self.id))
         else:
             return send_action("notice", self, "You cannot collect this!")
@@ -524,8 +521,7 @@ class Item(GameObject):
             # Change owner
             self.owner = target_player
             self.on_handedover(player=current_player(), receiver=target_player)
-            DB.session.add(self)
-            DB.session.commit()
+            self.commit()
             return redirect(url_for(self.__class__, resource_id=self.id))
         else:
             return send_action("notice", self, "You cannot hand this over.")

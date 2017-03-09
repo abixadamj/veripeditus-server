@@ -37,12 +37,15 @@ class GameRepo(git.Repo):
         open(os.path.join(repo.working_dir, "veripeditus", "game", name, "data", ".placeholder"),
              "a").close()
 
-        # Copy template game file
+        # Copy template game files
+        shutil.copyfile(os.path.join(DATA_DIR, "template_setup.py"),
+                        os.path.join(repo.working_dir, "setup.py"))
         shutil.copyfile(os.path.join(DATA_DIR, "template_init.py"),
                         os.path.join(repo.working_dir, "veripeditus", "game", name, "__init__.py"))
 
         # Add template files to index
-        repo.index.add([os.path.join("veripeditus", "game", name, "__init__.py"),
+        repo.index.add([os.path.join("veripeditus", "setup.py"),
+                        os.path.join("veripeditus", "game", name, "__init__.py"),
                         os.path.join("veripeditus", "game", name, "data", ".placeholder")])
 
         # Commit

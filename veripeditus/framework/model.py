@@ -31,7 +31,7 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.sql import and_
 
 from veripeditus.framework.util import current_player, get_image_path, get_gameobject_distance, random_point_in_polygon, send_action
-from veripeditus.server.app import DB, OA
+from veripeditus.server.db import DB, OA
 from veripeditus.server.model import Base, World
 from veripeditus.server.util import api_method, get_data_path
 

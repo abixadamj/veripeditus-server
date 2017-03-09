@@ -26,7 +26,8 @@ import os
 from flask import request, Response, g
 
 from veripeditus.framework.model import GameObject
-from veripeditus.server.app import DB, APP
+from veripeditus.server.app import APP
+from veripeditus.server.db import DB
 from veripeditus.server.auth import Roles
 from veripeditus.server.model import User, Game, World
 from veripeditus.server.util import get_games

@@ -66,7 +66,8 @@ def server_main(): # pragma: no cover
         from flask_compress import Compress
         Compress(APP)
 
-    # Run Flask application
+    # Import DB and Run Flask application
+    import veripeditus.server.db
     APP.run(host=args.host, port=int(args.port))
 
 # Allow direct calling of this script

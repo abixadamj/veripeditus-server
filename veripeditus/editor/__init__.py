@@ -14,6 +14,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from veripeditus.editor.repo import GameRepo
+from veripeditus.editor.util import name_to_eggname
+
+import argparse
 import os
 import sys
 
@@ -29,3 +33,15 @@ f not os.path.isdir(DIR_WORK):
 
 # Append live directory to module path
 sys.path.append(DIR_LIVE)
+
+def newgmae_main(): # pragma: no cover
+    """ Entry point for the veripeditus-newgame command.
+
+    Used to create a new game in a directory.
+    """
+
+    # parse arguments
+    aparser = argparse.ArgumentParser()
+    aparser.add_argument("name", help="name of the new game")
+
+    GameRepo(name, working_dir=os.path.join(os.path.realpath(os.curdir), name_to_eggname(name)))

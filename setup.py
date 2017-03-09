@@ -47,22 +47,20 @@ setup(
                       'Flask>=0.10',
                       'Flask-Restless>=1.0.0b2.dev0',
                       'Flask-SQLAlchemy',
+                      'GitPython',
                       'gpxpy',
                       'OSMAlchemy',
                       'passlib',
+                      'setuptools',
                       'Shapely',
                       'SQLAlchemy>=1.1.0',
                       'SQLAlchemy-Utils',
                      ],
-    extras_require={
-                    'Editor': [
-                               'GitPython',
-                              ],
-                   },
     test_suite='test',
     entry_points={
                   'console_scripts': [
-                                      'veripeditus-standalone = veripeditus.server:server_main'
+                                      'veripeditus-standalone = veripeditus.server:server_main',
+                                      'veripeditus-newgame = veripeditus.editor:newgame'
                                      ]
                  },
     classifiers=[

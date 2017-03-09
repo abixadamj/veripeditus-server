@@ -81,6 +81,9 @@ class GameRepo(git.Repo):
                 contents.replace("%VERSION%", self.version)
                 template.write(contents)
 
+            # Remove temp file
+            os.remove(temp_file)
+
         # Add modified files to index and commit
         self.index.add([os.path.join("setup.py"),
                         os.path.join("veripeditus", "game", self.pkgname, "__init__.py")])

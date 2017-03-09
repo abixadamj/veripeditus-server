@@ -29,7 +29,8 @@ from werkzeug.wrappers import Response
 
 from veripeditus.framework import VERSION
 from veripeditus.framework.model import GameObject
-from veripeditus.server.app import APP, DB, OA
+from veripeditus.server.app import APP
+from veripeditus.server.db import DB, OA
 from veripeditus.server.control import needs_authentication, _check_auth
 from veripeditus.server.model import User, World, Game
 from veripeditus.server.sources import get_sources, sources_to_tarball

@@ -27,7 +27,8 @@ from flask import g, redirect
 from flask_restless import url_for
 from sqlalchemy_utils import PasswordType, force_auto_coercion
 
-from veripeditus.server.app import APP, DB
+from veripeditus.server.app import APP
+from veripeditus.server.db import DB
 from veripeditus.server.auth import Roles
 from veripeditus.server.util import api_method, get_game_by_name
 

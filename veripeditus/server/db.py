@@ -1,7 +1,5 @@
 """
-Flask application code for the Veripeditus server
-
-This module contains everything to set up the Flask application.
+Flask-SQLAlchemy stuff for veripeditus-server.
 """
 
 # veripeditus-server - Server component for the Veripeditus game framework
@@ -23,21 +21,22 @@ This module contains everything to set up the Flask application.
 # pragma pylint: disable=wrong-import-position
 # pragma pylint: disable=unused-import
 
-from flask import Flask
+from veripeditus.server.app import APP
+
 from flask_sqlalchemy import SQLAlchemy
 from osmalchemy import OSMAlchemy
 
-# Get a basic Flask application
-APP = Flask(__name__)
+# Initialise SQLAlchemy and OSMAlchemy
+DB = SQLAlchemy(APP)
+OA = OSMAlchemy(DB, overpass=True if APP.config['OSMALCHEMY_ONLINE'] else None)
 
-# Default configuration
-# FIXME allow modification after module import
-APP.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-APP.config['PASSWORD_SCHEMES'] = ['pbkdf2_sha512', 'md5_crypt']
-APP.config['BASIC_REALM'] = "Veripeditus"
-APP.config['OSMALCHEMY_ONLINE'] = True
+# Import model and create tables
+import veripeditus.server.model
+DB.create_all()
 
-# Load configuration from a list of text files
-CFGLIST = ['/var/lib/veripeditus/dbconfig.cfg', '/etc/veripeditus/server.cfg']
-for cfg in CFGLIST:
-    APP.config.from_pyfile(cfg, silent=True)
+# Run initialisation code
+from veripeditus.server.control import init
+init()
+
+# Import REST API
+import veripeditus.server.rest

@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from veripeditus.editor import DIR_LIVE
+from veripeditus.editor.util import name_to_eggname, name_to_pkgname
 
 import git
 import os
@@ -26,27 +27,27 @@ DATA_DIR = os.path.join(os.path.dirname(sys.modules["veripeditus.editor"].__file
 
 class GameRepo(git.Repo):
     @staticmethod
-    def initial_commit(repo, name):
+    def initial_commit(repo, pkgname):
         """ Commits an initial game template to the repo. """
 
         # Create directories to main package file
-        os.makedirs(os.path.join(repo.working_dir, "veripeditus", "game", name))
+        os.makedirs(os.path.join(repo.working_dir, "veripeditus", "game", pkgname))
 
         # Create empty data dir with placeholder
-        os.mkdir(os.path.join(repo.working_dir, "veripeditus", "game", name, "data"))
-        open(os.path.join(repo.working_dir, "veripeditus", "game", name, "data", ".placeholder"),
+        os.mkdir(os.path.join(repo.working_dir, "veripeditus", "game", pkgname, "data"))
+        open(os.path.join(repo.working_dir, "veripeditus", "game", pkgname, "data", ".placeholder"),
              "a").close()
 
         # Copy template game files
         shutil.copyfile(os.path.join(DATA_DIR, "template_setup.py"),
                         os.path.join(repo.working_dir, "setup.py"))
         shutil.copyfile(os.path.join(DATA_DIR, "template_init.py"),
-                        os.path.join(repo.working_dir, "veripeditus", "game", name, "__init__.py"))
+                        os.path.join(repo.working_dir, "veripeditus", "game", pkgname, "__init__.py"))
 
         # Add template files to index
         repo.index.add([os.path.join("veripeditus", "setup.py"),
-                        os.path.join("veripeditus", "game", name, "__init__.py"),
-                        os.path.join("veripeditus", "game", name, "data", ".placeholder")])
+                        os.path.join("veripeditus", "game", pkgname, "__init__.py"),
+                        os.path.join("veripeditus", "game", pkgname, "data", ".placeholder")])
 
         # Commit
         repo.index.commit("Initial commit of template game files.")
@@ -55,14 +56,24 @@ class GameRepo(git.Repo):
         repo.create_head("review", "HEAD")
         repo.create_head("reviewed", "HEAD")
 
-    def __init__(self, game):
-        # Determine working directory for repo
-        self.working_dir = os.path.join(DIR_LIVE, game.package)
+    def __init__(self, name, eggname=None, pkgname=None, working_dir=None):
+        # Determine defaults
+        if eggname is None:
+            eggname = name_to_eggname(name)
+        if pkgname is None:
+            pkgname = name_to_pkgname(name)
+        if working_dir is None:
+            working_dir = os.path.join(DIR_LIVE, eggname)
+
+        self.working_dir = working_dir
+        self.name = name
+        self.eggname = eggname
+        self.pkgname = pkgname
 
         # Init Git repo if it does not exist
         if not os.path.isdir(self.working_dir):
             repo = git.Repo.init(self.working_dir)
-            GameRepo.initial_commit(repo, game.package)
+            GameRepo.initial_commit(repo, self.pkgname)
 
         # Call parent constructor to get us linked to the repo
         git.Repo.__init__(self, self.working_dir)

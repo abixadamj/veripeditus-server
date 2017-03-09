@@ -14,20 +14,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from veripeditus.server.app import APP
+from veripeditus.editor.repo import GameRepo
+from veripeditus.editor.util import name_to_eggname
 
+import argparse
 import os
 
-# Directories for live games and working trees
-DIR_LIVE = os.path.join(APP.config['CODE_EDITOR_PATH'], 'live')
-DIR_WORK = os.path.join(APP.config['CODE_EDITOR_PATH'], 'work')
+def newgame_main(): # pragma: no cover
+    """ Entry point for the veripeditus-newgame command.
 
-if APP.config['ENABLE_CODE_EDITOR']:
-    # Create missing directories
-    if not os.path.isdir(DIR_LIVE):
-        os.mkdir(DIR_LIVE)
-    if not os.path.isdir(DIR_WORK):
-        os.mkdir(DIR_WORK)
+    Used to create a new game in a directory.
+    """
 
-    # Append live directory to module path
-    sys.path.append(DIR_LIVE)
+    # parse arguments
+    aparser = argparse.ArgumentParser()
+    aparser.add_argument("name", help="name of the new game")
+    args = aparser.parse_args()
+
+    GameRepo(args.name, working_dir=os.path.join(os.path.realpath(os.curdir), name_to_eggname(args.name)))

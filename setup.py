@@ -60,7 +60,7 @@ setup(
     entry_points={
                   'console_scripts': [
                                       'veripeditus-standalone = veripeditus.server:server_main',
-                                      'veripeditus-newgame = veripeditus.editor:newgame'
+                                      'veripeditus-newgame = veripeditus.editor.tools:newgame_main'
                                      ]
                  },
     classifiers=[

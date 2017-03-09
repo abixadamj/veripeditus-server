@@ -89,6 +89,29 @@ class GameRepo(git.Repo):
                         os.path.join("veripeditus", "game", self.pkgname, "__init__.py")])
         self.index.commit("Replace template variables.")
 
+    def _auto_merge(self, src, dest):
+        if self.is_dirty():
+            # DIXME raise proper exception
+            raise Exception("Repo is dirty.")
+
+        if not self.is_ancestor(dest, src):
+            # FIXME raise proper exception
+            raise Exception("%s is not an ancestor of %s." % (src, dest))
+
+        base = self.merge_base(src, dest)
+        active = self.active_branch
+        self.branches[dest].checkout(force=True)
+        self.index.merge_tree(self.branches[src], base=base)
+        self.index.commit("Merging %s into %s." % (src, dest), parent_commits=(self.branches[dest].commit,
+                                                                               self.branches[src].commit))
+        active.checkout(force=True)
+
+    def prepare_review(self):
+        return self._auto_merge("master", "review")
+
+    def review(self):
+        return self._auto_merge("review", "reviewed")
+
     def __init__(self, name, eggname=None, pkgname=None, version=None, working_dir=None):
         # Determine defaults
         if eggname is None:
@@ -116,3 +139,7 @@ class GameRepo(git.Repo):
 
         # Replace template variables in initial commit
         self.replace_template_vars()
+
+        # Also update review branches
+        self.prepare_review()
+        self.review()

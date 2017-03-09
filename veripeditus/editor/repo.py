@@ -81,10 +81,10 @@ class GameRepo(git.Repo):
                 contents.replace("%VERSION%", self.version)
                 template.write(contents)
 
-            # Add modified files to index and commit
-            self.index.add([os.path.join("setup.py"),
-                            os.path.join("veripeditus", "game", self.pkgname, "__init__.py")])
-            self.index.commit("Replace template variables.")
+        # Add modified files to index and commit
+        self.index.add([os.path.join("setup.py"),
+                        os.path.join("veripeditus", "game", self.pkgname, "__init__.py")])
+        self.index.commit("Replace template variables.")
 
     def __init__(self, name, eggname=None, pkgname=None, version=None, working_dir=None):
         # Determine defaults

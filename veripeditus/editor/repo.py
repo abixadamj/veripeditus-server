@@ -46,7 +46,7 @@ class GameRepo(git.Repo):
                         os.path.join(repo.working_dir, "veripeditus", "game", pkgname, "__init__.py"))
 
         # Add template files to index
-        repo.index.add([os.path.join("veripeditus", "setup.py"),
+        repo.index.add([os.path.join("setup.py"),
                         os.path.join("veripeditus", "game", pkgname, "__init__.py"),
                         os.path.join("veripeditus", "game", pkgname, "data", ".placeholder")])
 

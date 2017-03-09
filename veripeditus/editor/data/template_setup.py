@@ -3,10 +3,10 @@
 from setuptools import setup
 
 setup(
-    name='Veripeditus-Game-%PKGNAME%',
+    name='Veripeditus-Game-%EGGNAME%',
     version='%VERSION%',
     packages=[
-              'veripeditus.game.%MODNAME%',
+              'veripeditus.game.%PKGNAME%',
              ],
     namespace_packages=[
                         'veripeditus.game',
@@ -14,7 +14,7 @@ setup(
                        ],
     include_package_data=True,
     package_data={
-                  'veripeditus.game.%MODNAME%': ['data/*'],
+                  'veripeditus.game.%PKGNAME%': ['data/*'],
                  },
     zip_safe=False,
     install_requires=[

@@ -75,10 +75,10 @@ class GameRepo(git.Repo):
             # Read copy and write back to template, replacing variables
             with open(template_file, "w") as template, open(temp_file, "r") as temp:
                 contents = temp.read()
-                contents.replace("%NAME%", self.name)
-                contents.replace("%EGGNAME%", self.eggname)
-                contents.replace("%PKGNAME%", self.pkgname)
-                contents.replace("%VERSION%", self.version)
+                contents = contents.replace("%NAME%", self.name)
+                contents = contents.replace("%EGGNAME%", self.eggname)
+                contents = contents.replace("%PKGNAME%", self.pkgname)
+                contents = contents.replace("%VERSION%", self.version)
                 template.write(contents)
 
             # Remove temp file
